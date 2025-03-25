@@ -511,7 +511,7 @@ DropMessage(m) ==
 ----
 \* Defines how the variables may transition.
 Next == /\ \/ \E i \in Server : Timeout(i)
-           \/ \E i \in Server : Restart(i)
+\*           \/ \E i \in Server : Restart(i)
            \/ \E i,j \in Server : i /= j /\ RequestVote(i, j)
            \/ \E i \in Server : BecomeLeader(i)
            \/ \E i \in Server, v \in Value : ClientRequest(i, v)
@@ -537,6 +537,59 @@ MoreThanOneLeaderInv ==
          /\ state[j] = Leader)
         => i = j    
 
+min(a, b) == IF a < b THEN a ELSE b
+
+\* Every (index, term) pair determines a log prefix.
+\* From page 8 of the Raft paper: "If two logs contain an entry with the same index and term, then the logs are identical in all preceding entries."
+LogMatchingInv ==
+    \A i, j \in Server : i /= j =>
+        \A n \in 1..min(Len(log[i]), Len(log[j])) :
+            log[i][n].term = log[j][n].term =>
+            SubSeq(log[i],1,n) = SubSeq(log[j],1,n)
+
+\* The prefix of the log of server i that has been committed up to term x
+CommittedTermPrefix(i, x) ==
+    \* Only if log of i is non-empty, and if there exists an entry up to the term x
+    IF Len(log[i]) /= 0 /\ \E y \in DOMAIN log[i] : log[i][y].term <= x
+    THEN
+      \* then, we use the subsequence up to the maximum committed term of the leader
+      LET maxTermIndex ==
+          CHOOSE y \in DOMAIN log[i] :
+            /\ log[i][y].term <= x
+            /\ \A z \in DOMAIN log[i] : log[i][z].term <= x  => y >= z
+      IN SubSeq(log[i], 1, min(maxTermIndex, commitIndex[i]))
+    \* Otherwise the prefix is the empty tuple
+    ELSE << >>
+
+CheckIsPrefix(seq1, seq2) ==
+    /\ Len(seq1) <= Len(seq2)
+    /\ \A i \in 1..Len(seq1) : seq1[i] = seq2[i]
+        
+\* The committed entries in every log are a prefix of the
+\* leader's log up to the leader's term (since a next Leader may already be
+\* elected without the old leader stepping down yet)
+LeaderCompletenessInv ==
+    \A i \in Server :
+        state[i] = Leader =>
+        \A j \in Server : i /= j =>
+            CheckIsPrefix(CommittedTermPrefix(j, currentTerm[i]),log[i])
+            
+\* The prefix of the log of server i that has been committed
+Committed(i) ==
+    IF commitIndex[i] = 0
+    THEN << >>
+    ELSE SubSeq(log[i],1,commitIndex[i])
+    
+\* Committed log entries should never conflict between servers
+LogInv ==
+    \A i, j \in Server :
+        \/ CheckIsPrefix(Committed(i),Committed(j)) 
+        \/ CheckIsPrefix(Committed(j),Committed(i))
+
+\* Note that LogInv checks for safety violations across space
+\* This is a key safety invariant and should always be checked
+THEOREM Spec => []LogInv
+            
 \* A leader's maxc should remain under MaxClientRequests
 MaxCInv == (\E i \in Server : state[i] = Leader) => maxc <= MaxClientRequests
 

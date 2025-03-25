@@ -14,7 +14,7 @@ Modified by Ovidiu Marcu
 How to run?
 
 1)
-You can run one configuration see raft.cfg with: `./tlc.py -n --trace-name Terr1 --dot --coverage 1 mc raft.tla`, at last commit.
+You can run one configuration see raft.cfg with: `./tlc.py -n --trace-name Terr1 --dot --coverage 1 mc raft.tla`, at latest commit.
 
 OR 
 
