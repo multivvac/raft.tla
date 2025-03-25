@@ -11,12 +11,25 @@ This work is licensed under the Creative Commons Attribution-4.0 International L
 
 Modified by Ovidiu Marcu
 
+How to run?
+
+1)
+You can run one configuration see raft.cfg with: `./tlc.py -n --trace-name Terr1 --dot --coverage 1 mc raft.tla`, at last commit.
+
+OR 
+
+2)
+check the following with the Toolbox:
+
+git checkout b7dffa9045541acd73568ee0a161ea60d919e298
+
 State constraint for model checking
 
 (\A i \in Server: currentTerm[i] <= 3 /\ Len(log[i]) <= 3 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1)
 
-Disable Profiling in TLC Options.
+Disable Profiling in TLC Options. See screenshots for initializing model and expected results.
 
+TLC command line parameters: -coverage 1
 My model
 
 ---- MODULE MC ----

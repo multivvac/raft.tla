@@ -1,6 +1,6 @@
 --------------------------------- MODULE raft ---------------------------------
 \* This is the formal specification for the Raft consensus algorithm.
-\* Modified by Ovidiu Marcu.
+\*
 \* Copyright 2014 Diego Ongaro.
 \* This work is licensed under the Creative Commons Attribution-4.0
 \* International License https://creativecommons.org/licenses/by/4.0/
@@ -518,9 +518,11 @@ Next == /\ \/ \E i \in Server : Timeout(i)
            \/ \E i \in Server : AdvanceCommitIndex(i)
            \/ \E i,j \in Server : i /= j /\ AppendEntries(i, j)
            \/ \E m \in {msg \in ValidMessage(messages) : 
-                    msg.mtype \in {RequestVoteRequest, AppendEntriesRequest}} : Receive(m)
-\*           \/ \E m \in DOMAIN messages : DuplicateMessage(m)
-\*           \/ \E m \in ValidMessage(messages) : DropMessage(m)
+                    msg.mtype \in {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse}} : Receive(m)
+\*           \/ \E m \in {msg \in ValidMessage(messages) : 
+\*                    msg.mtype \in {AppendEntriesRequest}} : DuplicateMessage(m)
+\*           \/ \E m \in {msg \in ValidMessage(messages) : 
+\*                    msg.mtype \in {RequestVoteRequest}} : DropMessage(m)
            \* History variable that tracks every log ever:
         /\ allLogs' = allLogs \cup {log[i] : i \in Server}
 
@@ -544,4 +546,7 @@ LeaderCountInv == \A i \in Server : leaderCount[i] < MaxBecomeLeader
 \* No server can have a term exceeding MaxTerm
 MaxTermInv == \A i \in Server : currentTerm[i] <= MaxTerm
 
+MyConstraint == (\A i \in Server: currentTerm[i] <= 3 /\ Len(log[i]) <= 3 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1)
+
+Symmetry == Permutations(Server)
 ===============================================================================
