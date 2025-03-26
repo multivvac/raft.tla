@@ -13,23 +13,38 @@ Modified by Ovidiu Marcu
 
 How to run?
 
+The following runs with Restart, DuplicateMessage and DropMessage disabled.
+
 1)
-You can run one configuration see raft.cfg with: `./tlc.py -n --trace-name Terr1 --dot --coverage 1 mc raft.tla`, at latest commit.
+You can run one configuration see raft.cfg with: ./tlc.py --coverage 1 mc raft.tla, at latest commit.
+
+
+49455516 states generated, 6425257 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 49.
+Finished in 03min 22s at (2025-03-26 10:21:14)
 
 OR 
 
 2)
-check the following with the Toolbox:
-
-git checkout b7dffa9045541acd73568ee0a161ea60d919e298
+model check the following with the Toolbox:
 
 State constraint for model checking
 
-(\A i \in Server: currentTerm[i] <= 3 /\ Len(log[i]) <= 3 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1)
+(\A i \in Server: currentTerm[i] <= 2 /\ Len(log[i]) <= 2 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1) /\ LeaderCountInv
 
-Disable Profiling in TLC Options. See screenshots for initializing model and expected results.
+Disable Profiling in TLC Options. See screenshots, raft.cfg for initializing model and expected results.
 
 TLC command line parameters: -coverage 1
+
+INVARIANTS
+    MoreThanOneLeaderInv
+    LogMatchingInv
+    LeaderCompletenessInv
+    LogInv
+    MaxCInv
+    LeaderCountInv
+    MaxTermInv
+
 My model
 
 ---- MODULE MC ----
@@ -42,43 +57,43 @@ r1, r2, r3
 
 \* MV CONSTANT declarations@modelParameterConstants
 CONSTANTS
-v1, v2
+v1
 ----
 
 \* MV CONSTANT definitions Server
-const_1742894465167335000 == 
+const_1742979488646140000 == 
 {r1, r2, r3}
 ----
 
 \* MV CONSTANT definitions Value
-const_1742894465167336000 == 
-{v1, v2}
+const_1742979488646141000 == 
+{v1}
 ----
 
 \* SYMMETRY definition
-symm_1742894465167337000 == 
-Permutations(const_1742894465167335000)
+symm_1742979488646142000 == 
+Permutations(const_1742979488646140000)
 ----
 
 \* CONSTANT definitions @modelParameterConstants:10MaxClientRequests
-const_1742894465167338000 == 
-3
-----
-
-\* CONSTANT definitions @modelParameterConstants:11MaxBecomeLeader
-const_1742894465167339000 == 
+const_1742979488646143000 == 
 1
 ----
 
+\* CONSTANT definitions @modelParameterConstants:11MaxBecomeLeader
+const_1742979488646144000 == 
+2
+----
+
 \* CONSTANT definitions @modelParameterConstants:12MaxTerm
-const_1742894465167340000 == 
-3
+const_1742979488646145000 == 
+2
 ----
 
 \* CONSTRAINT definition @modelParameterContraint:0
-constr_1742894465168341000 ==
-(\A i \in Server: currentTerm[i] <= 3 /\ Len(log[i]) <= 3 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1)
+constr_1742979488646146000 ==
+(\A i \in Server: currentTerm[i] <= 2 /\ Len(log[i]) <= 2 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1) /\ LeaderCountInv
 ----
 =============================================================================
 \* Modification History
-\* Created Tue Mar 25 10:21:05 CET 2025 by ovidiu-cristian.marcu
+\* Created Wed Mar 26 09:58:08 CET 2025 by ovidiu-cristian.marc

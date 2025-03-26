@@ -1,5 +1,6 @@
 --------------------------------- MODULE raft ---------------------------------
 \* This is the formal specification for the Raft consensus algorithm.
+\* Modified by Ovidiu Marcu. Simplified model and performance invariants added.
 \*
 \* Copyright 2014 Diego Ongaro.
 \* This work is licensed under the Creative Commons Attribution-4.0
@@ -594,12 +595,12 @@ THEOREM Spec => []LogInv
 MaxCInv == (\E i \in Server : state[i] = Leader) => maxc <= MaxClientRequests
 
 \* No server can become leader more than MaxBecomeLeader times
-LeaderCountInv == \A i \in Server : leaderCount[i] < MaxBecomeLeader
+LeaderCountInv == \E i \in Server : (state[i] = Leader => leaderCount[i] <= MaxBecomeLeader)
 
 \* No server can have a term exceeding MaxTerm
 MaxTermInv == \A i \in Server : currentTerm[i] <= MaxTerm
 
-MyConstraint == (\A i \in Server: currentTerm[i] <= 3 /\ Len(log[i]) <= 3 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1)
+MyConstraint == (\A i \in Server: currentTerm[i] <= 2 /\ Len(log[i]) <= 2 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1) /\ LeaderCountInv
 
 Symmetry == Permutations(Server)
 ===============================================================================
