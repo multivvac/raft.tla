@@ -23,6 +23,11 @@ You can run one configuration see raft.cfg with: ./tlc.py --coverage 1 mc raft.t
 The depth of the complete state graph search is 49.
 Finished in 03min 22s at (2025-03-26 10:21:14)
 
+My configuration:
+Running breadth-first search Model-Checking with 32 workers on 32 cores with 7282MB heap and 4096MB offheap memory [pid: 1231] (Linux 5.15.167.4-microsoft-standard-WSL2 amd64, Ubuntu 11.0.26 x86_64, MSBDiskFPSet, DiskStateQueue).
+
+When enabling Restart:
+Progress(38) at 2025-03-26 10:49:32: 226,554,224 states generated (15,125,945 s/min), 32,923,274 distinct states found (1,987,637 ds/min), 7,516,412 states left on queue. and keeps running..
 OR 
 
 2)

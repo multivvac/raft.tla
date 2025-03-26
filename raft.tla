@@ -170,7 +170,7 @@ InitHistoryVars == /\ elections = {}
                    /\ allLogs   = {}
                    /\ voterLog  = [i \in Server |-> [j \in {} |-> <<>>]]
 InitServerVars == /\ currentTerm = [i \in Server |-> 1]
-                  /\ state       = [i \in Server |-> Follower]
+                  /\ state       = [i \in Server |-> Follower] \*IF i = 1 THEN Leader ELSE Follower
                   /\ votedFor    = [i \in Server |-> Nil]
 InitCandidateVars == /\ votesResponded = [i \in Server |-> {}]
                      /\ votesGranted   = [i \in Server |-> {}]
@@ -190,12 +190,14 @@ Init == /\ messages = [m \in {} |-> 0]
         /\ maxc = 0
         /\ leaderCount = [i \in Server |-> 0]
 
+
 ----
 \* Define state transitions
 
 \* Server i restarts from stable storage.
 \* It loses everything but its currentTerm, votedFor, and log.
 Restart(i) ==
+    /\ state[i] = Leader
     /\ state'          = [state EXCEPT ![i] = Follower]
     /\ votesResponded' = [votesResponded EXCEPT ![i] = {}]
     /\ votesGranted'   = [votesGranted EXCEPT ![i] = {}]
@@ -233,17 +235,42 @@ RequestVote(i, j) ==
 \* Leader i sends j an AppendEntries request containing up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
+\*AppendEntries(i, j) ==
+\*    /\ i /= j
+\*    /\ state[i] = Leader
+\*    /\ LET prevLogIndex == nextIndex[i][j] - 1
+\*           prevLogTerm == IF prevLogIndex > 0 THEN
+\*                              log[i][prevLogIndex].term
+\*                          ELSE
+\*                              0
+\*           \* Send up to 1 entry, constrained by the end of the log.
+\*           lastEntry == Min({Len(log[i]), nextIndex[i][j]})
+\*           entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
+\*       IN Send([mtype          |-> AppendEntriesRequest,
+\*                mterm          |-> currentTerm[i],
+\*                mprevLogIndex  |-> prevLogIndex,
+\*                mprevLogTerm   |-> prevLogTerm,
+\*                mentries       |-> entries,
+\*                \* mlog is used as a history variable for the proof.
+\*                \* It would not exist in a real implementation.
+\*                mlog           |-> log[i],
+\*                mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
+\*                msource        |-> i,
+\*                mdest          |-> j])
+\*    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+
 AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
+    /\ Len(log[i]) > 0  \* Only proceed if the leader has entries to send
+    /\ nextIndex[i][j] <= Len(log[i])  \* Only proceed if there are entries to send to this follower
     /\ LET prevLogIndex == nextIndex[i][j] - 1
            prevLogTerm == IF prevLogIndex > 0 THEN
                               log[i][prevLogIndex].term
                           ELSE
                               0
-           \* Send up to 1 entry, constrained by the end of the log.
-           lastEntry == Min({Len(log[i]), nextIndex[i][j]})
-           entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
+           \* Send exactly 1 entry
+           entries == << log[i][nextIndex[i][j]] >>
        IN Send([mtype          |-> AppendEntriesRequest,
                 mterm          |-> currentTerm[i],
                 mprevLogIndex  |-> prevLogIndex,
@@ -252,11 +279,11 @@ AppendEntries(i, j) ==
                 \* mlog is used as a history variable for the proof.
                 \* It would not exist in a real implementation.
                 mlog           |-> log[i],
-                mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
+                mcommitIndex   |-> Min({commitIndex[i], nextIndex[i][j]}),
                 msource        |-> i,
                 mdest          |-> j])
     /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
-
+    
 \* Candidate i transitions to leader.
 BecomeLeader(i) ==
     /\ state[i] = Candidate
@@ -298,7 +325,7 @@ ClientRequest(i, v) ==
 \*           \E s \in Server : 
 \*                 \E j \in DOMAIN log[s] : 
 \*                     log[s][j].value = v
-           \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = currentTerm[i]
+           \E j \in DOMAIN log[i] : log[i][j].value = v \*/\ log[i][j].term = currentTerm[i]
            newLog == IF entryExists 
                      THEN log[i]  \* Keep log unchanged if entry exists
                      ELSE Append(log[i], entry)  \* Otherwise append the new entry
@@ -514,12 +541,13 @@ DropMessage(m) ==
 Next == /\ \/ \E i \in Server : Timeout(i)
 \*           \/ \E i \in Server : Restart(i)
            \/ \E i,j \in Server : i /= j /\ RequestVote(i, j)
-           \/ \E i \in Server : BecomeLeader(i)
-           \/ \E i \in Server, v \in Value : ClientRequest(i, v)
+\*           \/ \E i \in Server : BecomeLeader(i)
+           \/ \E i \in Server, v \in Value : state[i] = Leader /\ ClientRequest(i, v)
            \/ \E i \in Server : AdvanceCommitIndex(i)
            \/ \E i,j \in Server : i /= j /\ AppendEntries(i, j)
            \/ \E m \in {msg \in ValidMessage(messages) : 
                     msg.mtype \in {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse}} : Receive(m)
+\*                    
 \*           \/ \E m \in {msg \in ValidMessage(messages) : 
 \*                    msg.mtype \in {AppendEntriesRequest}} : DuplicateMessage(m)
 \*           \/ \E m \in {msg \in ValidMessage(messages) : 
@@ -529,7 +557,34 @@ Next == /\ \/ \E i \in Server : Timeout(i)
 
 \* The specification must start with the initial state and transition according
 \* to Next.
-Spec == Init /\ [][Next]_vars
+
+MyInit == 
+    LET ServerIds == CHOOSE ids \in [1..3 -> Server] : TRUE
+        r1 == ServerIds[1]
+        r2 == ServerIds[2]
+        r3 == ServerIds[3]
+    IN
+    /\ allLogs = {<<>>}
+    /\ commitIndex = [s \in Server |-> 0]
+    /\ currentTerm = [s \in Server |-> 2]
+    /\ elections = { [ eterm |-> 2,
+                     eleader |-> r2,
+                     elog |-> <<>>,
+                     evotes |-> {r1, r3},
+                     evoterLog |-> (r1 :> <<>> @@ r3 :> <<>>) ] }
+    /\ leaderCount = [s \in Server |-> IF s = r2 THEN 1 ELSE 0]
+    /\ log = [s \in Server |-> <<>>]
+    /\ matchIndex = [s \in Server |-> [t \in Server |-> 0]]
+    /\ maxc = 0
+    /\ messages = [m \in {} |-> 0]  \* Start with empty messages
+    /\ nextIndex = [s \in Server |-> [t \in Server |-> 1]]
+    /\ state = [s \in Server |-> IF s = r2 THEN Leader ELSE Follower]
+    /\ votedFor = [s \in Server |-> IF s = r2 THEN Nil ELSE r2]
+    /\ voterLog = [s \in Server |-> IF s = r2 THEN (r1 :> <<>> @@ r3 :> <<>>) ELSE <<>>]
+    /\ votesGranted = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
+    /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
+
+Spec == MyInit /\ [][Next]_vars
     
 MoreThanOneLeaderInv ==
     \A i,j \in Server :
@@ -600,7 +655,21 @@ LeaderCountInv == \E i \in Server : (state[i] = Leader => leaderCount[i] <= MaxB
 \* No server can have a term exceeding MaxTerm
 MaxTermInv == \A i \in Server : currentTerm[i] <= MaxTerm
 
-MyConstraint == (\A i \in Server: currentTerm[i] <= 2 /\ Len(log[i]) <= 2 ) /\ (\A m \in DOMAIN messages: messages[m] <= 1) /\ LeaderCountInv
+MyConstraint == (\A i \in Server: currentTerm[i] <= MaxTerm /\ Len(log[i]) <= MaxClientRequests ) /\ (\A m \in DOMAIN messages: messages[m] <= 1) /\ LeaderCountInv
 
+LeaderCommitted ==
+    \E i \in Server : ( commitIndex[i] < 2) \*state[i] = Leader =>
+    
 Symmetry == Permutations(Server)
 ===============================================================================
+
+This spec with attached cfg gives Error: Invariant LeaderCommitted is violated. See traceCommitIndex.txt for the trace.
+LeaderCommitted is a fake invariant to obtain a trace to check that commitIndex advances.
+
+Can be reproduced with:
+/raft.tla$ ./tlc.py --coverage 1 mc raft.tla
+
+11992284 states generated, 2959760 distinct states found, 1116863 states left on queue.
+The depth of the complete state graph search is 24.
+Finished in 50s at (2025-03-26 15:46:37)
+Trace exploration spec path: ./raft_TTrace_1743000346.tla
