@@ -1,6 +1,8 @@
---------------------------------- MODULE raft ---------------------------------
+----------------------------- MODULE raft -----------------------------
+
 \* This is the formal specification for the Raft consensus algorithm.
 \* Modified by Ovidiu Marcu. Simplified model and performance invariants added.
+\* Modified further to track message counts for entry commitment.
 \*
 \* Copyright 2014 Diego Ongaro.
 \* This work is licensed under the Creative Commons Attribution-4.0
@@ -58,6 +60,13 @@ VARIABLE leaderCount
 \* Maximum term number allowed in the model
 CONSTANTS MaxTerm
 
+\* ---- New variable for tracking entry commit message counts ----
+\* Maps <<logIndex, logTerm>> to a record tracking message counts.
+\* [ sentCount |-> Nat,   \* AppendEntriesRequests sent for this entry
+\*   ackCount  |-> Nat,   \* Successful AppendEntriesResponses received for this entry
+\*   committed |-> Bool ] \* Flag indicating if the entry is committed
+VARIABLE entryCommitStats
+\* -------------------------------------------------------------
 
 ----
 \* The following variables are all per server (functions with domain Server).
@@ -105,7 +114,7 @@ leaderVars == <<nextIndex, matchIndex, elections>>
 ----
 
 \* All variables; used for stuttering (asserting state hasn't changed).
-vars == <<messages, allLogs, serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+vars == <<messages, allLogs, serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 ----
 \* Helpers
@@ -170,7 +179,7 @@ InitHistoryVars == /\ elections = {}
                    /\ allLogs   = {}
                    /\ voterLog  = [i \in Server |-> [j \in {} |-> <<>>]]
 InitServerVars == /\ currentTerm = [i \in Server |-> 1]
-                  /\ state       = [i \in Server |-> Follower] \*IF i = 1 THEN Leader ELSE Follower
+                  /\ state       = [i \in Server |-> Follower]
                   /\ votedFor    = [i \in Server |-> Nil]
 InitCandidateVars == /\ votesResponded = [i \in Server |-> {}]
                      /\ votesGranted   = [i \in Server |-> {}]
@@ -189,7 +198,7 @@ Init == /\ messages = [m \in {} |-> 0]
         /\ InitLogVars
         /\ maxc = 0
         /\ leaderCount = [i \in Server |-> 0]
-
+        /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize new variable
 
 ----
 \* Define state transitions
@@ -197,7 +206,7 @@ Init == /\ messages = [m \in {} |-> 0]
 \* Server i restarts from stable storage.
 \* It loses everything but its currentTerm, votedFor, and log.
 Restart(i) ==
-    /\ state[i] = Leader
+    /\ state[i] = Leader \* limit restart to leaders todo mc
     /\ state'          = [state EXCEPT ![i] = Follower]
     /\ votesResponded' = [votesResponded EXCEPT ![i] = {}]
     /\ votesGranted'   = [votesGranted EXCEPT ![i] = {}]
@@ -205,7 +214,7 @@ Restart(i) ==
     /\ nextIndex'      = [nextIndex EXCEPT ![i] = [j \in Server |-> 1]]
     /\ matchIndex'     = [matchIndex EXCEPT ![i] = [j \in Server |-> 0]]
     /\ commitIndex'    = [commitIndex EXCEPT ![i] = 0]
-    /\ UNCHANGED <<messages, currentTerm, votedFor, log, elections, maxc, leaderCount>>
+    /\ UNCHANGED <<messages, currentTerm, votedFor, log, elections, maxc, leaderCount, entryCommitStats>>
 
 \* Server i times out and starts a new election.
 Timeout(i) == /\ state[i] \in {Follower, Candidate}
@@ -218,7 +227,7 @@ Timeout(i) == /\ state[i] \in {Follower, Candidate}
               /\ votesResponded' = [votesResponded EXCEPT ![i] = {}]
               /\ votesGranted'   = [votesGranted EXCEPT ![i] = {}]
               /\ voterLog'       = [voterLog EXCEPT ![i] = [j \in {} |-> <<>>]]
-              /\ UNCHANGED <<messages, leaderVars, logVars, maxc, leaderCount>>
+              /\ UNCHANGED <<messages, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 \* Candidate i sends j a RequestVote request.
 RequestVote(i, j) ==
@@ -230,47 +239,30 @@ RequestVote(i, j) ==
              mlastLogIndex |-> Len(log[i]),
              msource       |-> i,
              mdest         |-> j])
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
-\* Leader i sends j an AppendEntries request containing up to 1 entry.
+\* Leader i sends j an AppendEntries request containing exactly 1 entry. It was up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
-\*AppendEntries(i, j) ==
-\*    /\ i /= j
-\*    /\ state[i] = Leader
-\*    /\ LET prevLogIndex == nextIndex[i][j] - 1
-\*           prevLogTerm == IF prevLogIndex > 0 THEN
-\*                              log[i][prevLogIndex].term
-\*                          ELSE
-\*                              0
-\*           \* Send up to 1 entry, constrained by the end of the log.
-\*           lastEntry == Min({Len(log[i]), nextIndex[i][j]})
-\*           entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
-\*       IN Send([mtype          |-> AppendEntriesRequest,
-\*                mterm          |-> currentTerm[i],
-\*                mprevLogIndex  |-> prevLogIndex,
-\*                mprevLogTerm   |-> prevLogTerm,
-\*                mentries       |-> entries,
-\*                \* mlog is used as a history variable for the proof.
-\*                \* It would not exist in a real implementation.
-\*                mlog           |-> log[i],
-\*                mcommitIndex   |-> Min({commitIndex[i], lastEntry}),
-\*                msource        |-> i,
-\*                mdest          |-> j])
-\*    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
-
 AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
     /\ Len(log[i]) > 0  \* Only proceed if the leader has entries to send
-    /\ nextIndex[i][j] <= Len(log[i])  \* Only proceed if there are entries to send to this follower
-    /\ LET prevLogIndex == nextIndex[i][j] - 1
+    /\ nextIndex[i][j] <= Len(log[i])  \*  Only proceed if there are entries to send to this follower
+    /\ matchIndex[i][j] < nextIndex[i][j] \* Only send if follower hasn't already acknowledged this index
+    /\ LET entryIndex == nextIndex[i][j]
+           entry == log[i][entryIndex]
+           entries == << entry >>
+           entryKey == <<entryIndex, entry.term>>
+           prevLogIndex == entryIndex - 1
            prevLogTerm == IF prevLogIndex > 0 THEN
                               log[i][prevLogIndex].term
                           ELSE
                               0
-           \* Send exactly 1 entry
-           entries == << log[i][nextIndex[i][j]] >>
+           \* Send up to 1 entry, constrained by the end of the log.
+           \* lastEntry == Min({Len(log[i]), nextIndex[i][j]})
+           \* entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
+           
        IN Send([mtype          |-> AppendEntriesRequest,
                 mterm          |-> currentTerm[i],
                 mprevLogIndex  |-> prevLogIndex,
@@ -279,11 +271,15 @@ AppendEntries(i, j) ==
                 \* mlog is used as a history variable for the proof.
                 \* It would not exist in a real implementation.
                 mlog           |-> log[i],
-                mcommitIndex   |-> Min({commitIndex[i], nextIndex[i][j]}),
+                mcommitIndex   |-> Min({commitIndex[i], entryIndex}), \* lastEntry}),
                 msource        |-> i,
                 mdest          |-> j])
+       /\ entryCommitStats' =
+            IF entryKey \in DOMAIN entryCommitStats /\ ~entryCommitStats[entryKey].committed
+            THEN [entryCommitStats EXCEPT ![entryKey].sentCount = @ + 1]
+            ELSE entryCommitStats         
     /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
-    
+
 \* Candidate i transitions to leader.
 BecomeLeader(i) ==
     /\ state[i] = Candidate
@@ -300,8 +296,8 @@ BecomeLeader(i) ==
                            elog      |-> log[i],
                            evotes    |-> votesGranted[i],
                            evoterLog |-> voterLog[i]]}
-    /\ leaderCount' = [leaderCount EXCEPT ![i] = leaderCount[i] + 1]                       
-    /\ UNCHANGED <<messages, currentTerm, votedFor, candidateVars, logVars, maxc>>
+    /\ leaderCount' = [leaderCount EXCEPT ![i] = leaderCount[i] + 1]
+    /\ UNCHANGED <<messages, currentTerm, votedFor, candidateVars, logVars, maxc, entryCommitStats>>
 
 \* Leader i receives a client request to add v to the log.
 \*ClientRequest(i, v) ==
@@ -319,19 +315,19 @@ ValidMessage(msgs) ==
 ClientRequest(i, v) ==
     /\ state[i] = Leader
     /\ maxc < MaxClientRequests 
-    /\ LET entry == [term  |-> currentTerm[i],
-                     value |-> v]
-           entryExists == 
-\*           \E s \in Server : 
-\*                 \E j \in DOMAIN log[s] : 
-\*                     log[s][j].value = v
-           \E j \in DOMAIN log[i] : log[i][j].value = v \*/\ log[i][j].term = currentTerm[i]
-           newLog == IF entryExists 
-                     THEN log[i]  \* Keep log unchanged if entry exists
-                     ELSE Append(log[i], entry)  \* Otherwise append the new entry
-       IN  
+    /\ LET entryTerm == currentTerm[i]
+           entry == [term |-> entryTerm, value |-> v]
+           entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
+           newLog == IF entryExists THEN log[i] ELSE Append(log[i], entry)
+           newEntryIndex == Len(log[i]) + 1
+           newEntryKey == <<newEntryIndex, entryTerm>>
+       IN
         /\ log' = [log EXCEPT ![i] = newLog]
         /\ maxc' = IF entryExists THEN maxc ELSE maxc + 1
+        /\ entryCommitStats' =
+              IF ~entryExists /\ newEntryIndex > 0 \* Only add stats for truly new entries
+              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ])
+              ELSE entryCommitStats
     /\ UNCHANGED <<messages, serverVars, candidateVars,
                    leaderVars, commitIndex, leaderCount>>
 
@@ -355,7 +351,17 @@ AdvanceCommitIndex(i) ==
                   Max(agreeIndexes)
               ELSE
                   commitIndex[i]
-       IN commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
+           committedIndexes == { k \in Nat : /\ k > commitIndex[i]
+                                             /\ k <= newCommitIndex }
+           \* Identify the keys in entryCommitStats corresponding to newly committed entries
+           keysToUpdate == { key \in DOMAIN entryCommitStats : key[1] \in committedIndexes }           
+       IN /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
+          \* Update the 'committed' flag for the relevant entries in entryCommitStats
+          /\ entryCommitStats' =
+               [ key \in DOMAIN entryCommitStats |->
+                   IF key \in keysToUpdate
+                   THEN [ entryCommitStats[key] EXCEPT !.committed = TRUE ] \* Update record
+                   ELSE entryCommitStats[key] ]                             \* Keep old record       
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, log, maxc, leaderCount>>
 
 ----
@@ -383,7 +389,7 @@ HandleRequestVoteRequest(i, j, m) ==
                  msource      |-> i,
                  mdest        |-> j],
                  m)
-       /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+       /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 \* Server i receives a RequestVote response from server j with
 \* m.mterm = currentTerm[i].
@@ -401,7 +407,7 @@ HandleRequestVoteResponse(i, j, m) ==
        \/ /\ ~m.mvoteGranted
           /\ UNCHANGED <<votesGranted, voterLog>>
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 \* Server i receives an AppendEntries request from server j with
 \* m.mterm <= currentTerm[i]. This just handles m.entries of length 0 or 1, but
@@ -458,13 +464,15 @@ HandleAppendEntriesRequest(i, j, m) ==
                                  mdest           |-> j],
                                  m)
                        /\ UNCHANGED <<serverVars, log>>
-                   \/ \* conflict: remove 1 entry
+                   \/ \* conflict: remove 1 entry (simplified from original spec - assumes entry length 1)
                        /\ m.mentries /= << >>
                        /\ Len(log[i]) >= index
                        /\ log[i][index].term /= m.mentries[1].term
-                       /\ LET new == [index2 \in 1..(Len(log[i]) - 1) |->
-                                          log[i][index2]]
-                          IN log' = [log EXCEPT ![i] = new]
+                       /\ LET newLog == SubSeq(log[i], 1, index - 1) \* Truncate log
+                          IN log' = [log EXCEPT ![i] = newLog]
+\*                       /\ LET new == [index2 \in 1..(Len(log[i]) - 1) |->
+\*                                          log[i][index2]]
+\*                          IN log' = [log EXCEPT ![i] = new]
                        /\ UNCHANGED <<serverVars, commitIndex, messages>>
                    \/ \* no conflict: append entry
                        /\ m.mentries /= << >>
@@ -472,19 +480,38 @@ HandleAppendEntriesRequest(i, j, m) ==
                        /\ log' = [log EXCEPT ![i] =
                                       Append(log[i], m.mentries[1])]
                        /\ UNCHANGED <<serverVars, commitIndex, messages>>
-       /\ UNCHANGED <<candidateVars, leaderVars, maxc, leaderCount>>
+       /\ UNCHANGED <<candidateVars, leaderVars, maxc, leaderCount, entryCommitStats>> \* entryCommitStats unchanged on followers
 
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].
 HandleAppendEntriesResponse(i, j, m) ==
     /\ m.mterm = currentTerm[i]
     /\ \/ /\ m.msuccess \* successful
-          /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = IF matchIndex[i][j] > m.mmatchIndex THEN matchIndex[i][j] + 1 ELSE m.mmatchIndex + 1]
-          /\ matchIndex' = [matchIndex EXCEPT ![i][j] = IF matchIndex[i][j] > m.mmatchIndex THEN matchIndex[i][j] ELSE m.mmatchIndex]
+          /\ LET newMatchIndex == IF matchIndex[i][j] > m.mmatchIndex THEN matchIndex[i][j] ELSE m.mmatchIndex
+                 entryKey == IF newMatchIndex > 0 /\ newMatchIndex <= Len(log[i])
+                              THEN <<newMatchIndex, log[i][newMatchIndex].term>>
+                              ELSE <<0, 0>> \* Invalid index or empty log
+             IN /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = newMatchIndex + 1]
+                /\ matchIndex' = [matchIndex EXCEPT ![i][j] = newMatchIndex]
+                /\ entryCommitStats' =
+                     IF /\ entryKey /= <<0, 0>>
+                        /\ entryKey \in DOMAIN entryCommitStats
+                        /\ ~entryCommitStats[entryKey].committed
+                     THEN [entryCommitStats EXCEPT ![entryKey].ackCount = @ + 1]
+                     ELSE entryCommitStats
+                     
+\*          /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = 
+\*                   IF matchIndex[i][j] > m.mmatchIndex 
+\*                   THEN matchIndex[i][j] + 1 
+\*                   ELSE m.mmatchIndex + 1]
+\*          /\ matchIndex' = [matchIndex EXCEPT ![i][j] = 
+\*                   IF matchIndex[i][j] > m.mmatchIndex 
+\*                   THEN matchIndex[i][j] 
+\*                   ELSE m.mmatchIndex]
        \/ /\ \lnot m.msuccess \* not successful
           /\ nextIndex' = [nextIndex EXCEPT ![i][j] =
                                Max({nextIndex[i][j] - 1, 1})]
-          /\ UNCHANGED <<matchIndex>>
+          /\ UNCHANGED <<matchIndex, entryCommitStats>>
     /\ Discard(m)
     /\ UNCHANGED <<serverVars, candidateVars, logVars, elections, maxc, leaderCount>>
 
@@ -496,13 +523,13 @@ UpdateTerm(i, j, m) ==
     /\ state'          = [state       EXCEPT ![i] = Follower]
     /\ votedFor'       = [votedFor    EXCEPT ![i] = Nil]
        \* messages is unchanged so m can be processed further.
-    /\ UNCHANGED <<messages, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<messages, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 \* Responses with stale terms are ignored.
 DropStaleResponse(i, j, m) ==
     /\ m.mterm < currentTerm[i]
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 \* Receive a message.
 Receive(m) ==
@@ -529,25 +556,24 @@ Receive(m) ==
 \* The network duplicates a message
 DuplicateMessage(m) ==
     /\ Send(m)
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 \* The network drops a message
 DropMessage(m) ==
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, entryCommitStats>>
 
 ----
 \* Defines how the variables may transition.
 Next == /\ \/ \E i \in Server : Timeout(i)
 \*           \/ \E i \in Server : Restart(i)
            \/ \E i,j \in Server : i /= j /\ RequestVote(i, j)
-\*           \/ \E i \in Server : BecomeLeader(i)
+           \/ \E i \in Server : BecomeLeader(i)
            \/ \E i \in Server, v \in Value : state[i] = Leader /\ ClientRequest(i, v)
            \/ \E i \in Server : AdvanceCommitIndex(i)
            \/ \E i,j \in Server : i /= j /\ AppendEntries(i, j)
            \/ \E m \in {msg \in ValidMessage(messages) : 
                     msg.mtype \in {RequestVoteRequest, RequestVoteResponse, AppendEntriesRequest, AppendEntriesResponse}} : Receive(m)
-\*                    
 \*           \/ \E m \in {msg \in ValidMessage(messages) : 
 \*                    msg.mtype \in {AppendEntriesRequest}} : DuplicateMessage(m)
 \*           \/ \E m \in {msg \in ValidMessage(messages) : 
@@ -555,10 +581,8 @@ Next == /\ \/ \E i \in Server : Timeout(i)
            \* History variable that tracks every log ever:
         /\ allLogs' = allLogs \cup {log[i] : i \in Server}
 
-\* The specification must start with the initial state and transition according
-\* to Next.
-
-MyInit == 
+\* MyInit remains unchanged for the core Raft state, entryCommitStats is handled in Init.
+MyInit ==
     LET ServerIds == CHOOSE ids \in [1..3 -> Server] : TRUE
         r1 == ServerIds[1]
         r2 == ServerIds[2]
@@ -583,15 +607,20 @@ MyInit ==
     /\ voterLog = [s \in Server |-> IF s = r2 THEN (r1 :> <<>> @@ r3 :> <<>>) ELSE <<>>]
     /\ votesGranted = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
+    /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize here too
 
-Spec == MyInit /\ [][Next]_vars
-    
+\* The specification must start with the initial state and transition according
+\* to Next.
+Spec == Init /\ [][Next]_vars
+
+\* -------------------- Invariants --------------------
+
 MoreThanOneLeaderInv ==
     \A i,j \in Server :
         (/\ currentTerm[i] = currentTerm[j]
          /\ state[i] = Leader
          /\ state[j] = Leader)
-        => i = j    
+        => i = j
 
 min(a, b) == IF a < b THEN a ELSE b
 
@@ -655,21 +684,49 @@ LeaderCountInv == \E i \in Server : (state[i] = Leader => leaderCount[i] <= MaxB
 \* No server can have a term exceeding MaxTerm
 MaxTermInv == \A i \in Server : currentTerm[i] <= MaxTerm
 
-MyConstraint == (\A i \in Server: currentTerm[i] <= MaxTerm /\ Len(log[i]) <= MaxClientRequests ) /\ (\A m \in DOMAIN messages: messages[m] <= 1) /\ LeaderCountInv
+\* Check lower bound for message counts on committed entries ----
+\* For any entry that has been marked as committed, verify that either the number
+\* of AppendEntries requests sent OR the number of successful acknowledgments received
+\* is at least the minimum number of followers required to form a majority.
+\*EntryCommitMessageCountInv ==
+\*    LET NumServers == Cardinality(Server)
+\*        \* Minimum number of *followers* needed (in addition to the leader)
+\*        \* to reach a majority for committing an entry.
+\*        MinFollowersForMajority == NumServers \div 2
+\*    IN \A key \in DOMAIN entryCommitStats :
+\*        LET stats == entryCommitStats[key]
+\*        IN IF stats.committed
+\*           THEN \* Check if either sends OR acks meet the minimum follower threshold for majority
+\*                (stats.sentCount >= MinFollowersForMajority) \/ (stats.ackCount >= MinFollowersForMajority)
+\*           ELSE TRUE
 
+\* will fail when an entry was sent twice to a follower and no response was acked yet, which is normal
+EntryCommitMessageCountInv ==
+    LET NumFollowers == Cardinality(Server) - 1
+    IN \A key \in DOMAIN entryCommitStats :
+        LET stats == entryCommitStats[key]
+        IN IF stats.committed
+           THEN (stats.sentCount <= NumFollowers) \/ (stats.ackCount <= NumFollowers)
+           ELSE TRUE
+
+\* Check that committed entries received acknowledgments from a majority of followers.
+EntryCommitAckQuorumInv ==
+    LET NumServers == Cardinality(Server)
+        \* Minimum number of *followers* needed (in addition to the leader)
+        \* to reach a majority for committing an entry.
+        MinFollowerAcksForMajority == NumServers \div 2
+    IN \A key \in DOMAIN entryCommitStats :
+        LET stats == entryCommitStats[key]
+        IN stats.committed => (stats.ackCount >= MinFollowerAcksForMajority)
+
+MyConstraint == (\A i \in Server: currentTerm[i] <= MaxTerm /\ Len(log[i]) <= MaxClientRequests ) /\ (\A m \in DOMAIN messages: messages[m] <= 1)
+
+\* fake inv to obtain a trace
 LeaderCommitted ==
-    \E i \in Server : ( commitIndex[i] < 2) \*state[i] = Leader =>
-    
+    \E i \in Server : state[i] = Leader => commitIndex[i] < 2
+
 Symmetry == Permutations(Server)
 ===============================================================================
-
-This spec with attached cfg gives Error: Invariant LeaderCommitted is violated. See traceCommitIndex.txt for the trace.
-LeaderCommitted is a fake invariant to obtain a trace to check that commitIndex advances.
-
-Can be reproduced with:
-/raft.tla$ ./tlc.py --coverage 1 mc raft.tla
-
-11992284 states generated, 2959760 distinct states found, 1116863 states left on queue.
-The depth of the complete state graph search is 24.
-Finished in 50s at (2025-03-26 15:46:37)
-Trace exploration spec path: ./raft_TTrace_1743000346.tla
+\* Modification History
+\* Last modified Thu Mar 27 11:56:53 CET 2025 by ovidiu-cristian.marc
+\* Created Thu Mar 27 11:49:55 CET 2025 by ovidiu-cristian.marc
