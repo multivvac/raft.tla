@@ -292,7 +292,8 @@ ValidMessage(msgs) ==
 ClientRequest(i, v) ==
     /\ state[i] = Leader
     /\ maxc < MaxClientRequests 
-    /\ LET entry == [term  |-> currentTerm[i],
+    /\ LET entryTerm == currentTerm[i]
+           entry == [term  |-> entryTerm,
                      value |-> v]
            entryExists == 
 \*           \E s \in Server : 

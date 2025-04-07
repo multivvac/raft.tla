@@ -1,4 +1,11 @@
 # Project Intuition
+## Hints
+* check `ClientRequest`
+* `message: {term value payload}`
+* Follower check term and value receive from the leader in cache.
+* leader send appendidx to fllowers.
+* log should have payload. ALso entry.
+* two type of messages, cache store payload and nodes pass metadata. So payload just the partitions of original messages from client. 
 ![Project Intuition](HoverRaftProject.svg)
 # How HoverRaft Work
 ```plaintext
@@ -22,7 +29,7 @@ Followers
    v
    ✓ Append ordered log entry (OrderID X)
    ```
-# Recovery mechanism(Packet loss from Switch)
+# Recovery mechanism(Follower check if value loss when receive from leader)
 ```plaintext
 Follower 2 misses payload H123
          |
