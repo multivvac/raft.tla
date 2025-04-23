@@ -15,6 +15,7 @@ InitLeaderVars == /\ nextIndex  = [i \in Server |-> [j \in Server |-> 1]]
                   /\ matchIndex = [i \in Server |-> [j \in Server |-> 0]]
 InitLogVars == /\ log          = [i \in Server |-> << >>]
                /\ commitIndex  = [i \in Server |-> 0]
+               /\ unorderedPayloads = [i \in Server |-> {}]
 Init == /\ messages = [m \in {} |-> 0]
         /\ InitHistoryVars
         /\ InitServerVars

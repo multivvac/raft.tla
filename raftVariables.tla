@@ -62,10 +62,16 @@ VARIABLE nextIndex
 \* The latest entry that each follower has acknowledged is the same as the
 \* leader's. This is used to calculate commitIndex on the leader.
 VARIABLE matchIndex
+
+\* [Server -> SUBSET Value]
+\* Followers must park multicast payloads
+\* until the leader later tells them where that request belongs.
+VARIABLE unorderedPayloads 
+
 leaderVars == <<nextIndex, matchIndex>>
 
 \* All variables; used for stuttering (asserting state hasn't changed).
-vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
+vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars, unorderedPayloads>>
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
