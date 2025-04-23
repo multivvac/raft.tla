@@ -26,6 +26,9 @@ Receive(m) ==
        \/ /\ m.mtype = AppendEntriesResponse
           /\ \/ DropStaleResponse(i, j, m)
              \/ HandleAppendEntriesResponse(i, j, m)
+       \/ /\ m.mtype = ClientPayload
+          /\ HandleClientPayload(i, m)
+
 
 \* Defines how the variables may transition.
 Next == 

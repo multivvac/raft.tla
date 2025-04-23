@@ -337,6 +337,12 @@ SwitchDeliver(v) ==             \* v ∈ Value
                    logVars, unorderedPayloads,
                    maxc, leaderCount, entryCommitStats>>
 
+HandleClientPayload(i, m) ==
+    /\ m.mtype = ClientPayload
+    /\ unorderedPayloads' =
+         [unorderedPayloads EXCEPT ![i] = @ ∪ { m }]
+    /\ Discard(m)
+    /\ UNCHANGED <<vars \ {unorderedPayloads}>>
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
