@@ -1,0 +1,820 @@
+State 1: <Initial predicate>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = <<>>
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = (r1 :> <<>> @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = {<<>>}
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 0
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 2: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = <<>>
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = (r1 :> <<[term |-> 2, value |-> v2]>> @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = {<<>>}
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 1
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 3: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = <<>>
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r2 :> <<>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = {<<>>, <<[term |-> 2, value |-> v2]>>}
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 2
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 4: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = <<>>
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r2 :> <<>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 2
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 5: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r2 :> <<>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 2
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 6: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 7: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 8: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 9: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 10: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 1 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 11: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 1 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 12: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 1 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 13: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 1 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 14: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 15: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 16: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 17: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 0 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 18: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 19: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<[term |-> 2, value |-> v2]>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 20: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r3, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 0)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 0) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<[term |-> 2, value |-> v2]>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 1) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 21: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r3, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 0)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<[term |-> 2, value |-> v2]>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 2) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 22: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r3, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<[term |-> 2, value |-> v2]>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 2) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 23: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r3, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 1)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 0)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 2) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
+
+State 24: <Next line 541, col 9 to line 556, col 58 of module raft>
+/\ elections = { [ eterm |-> 2,
+    eleader |-> r1,
+    elog |-> <<>>,
+    evotes |-> {r1},
+    evoterLog |-> (r1 :> <<>>) ] }
+/\ messages = ([mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r2, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 3] :> 1 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r3, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 1] :> 0 @@ [mtype |-> M_AppendEntriesResponse, mterm |-> 2, msource |-> r3, mdest |-> r1, msuccess |-> TRUE, mmatchIndex |-> 2] :> 1 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r2, mprevLogIndex |-> 2, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v3]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 0, mprevLogTerm |-> 0, mentries |-> <<[term |-> 2, value |-> v2]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>, mcommitIndex |-> 0] :> 0 @@ [mtype |-> M_AppendEntriesRequest, mterm |-> 2, msource |-> r1, mdest |-> r3, mprevLogIndex |-> 1, mprevLogTerm |-> 2, mentries |-> <<[term |-> 2, value |-> v1]>>, mlog |-> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1], [term |-> 2, value |-> v3]>>, mcommitIndex |-> 2] :> 0)
+/\ matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 2 @@ r3 :> 1) @@
+  r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
+  r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
+/\ log = ( r1 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r2 :>
+      << [term |-> 2, value |-> v2],
+         [term |-> 2, value |-> v1],
+         [term |-> 2, value |-> v3] >> @@
+  r3 :> <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>> )
+/\ state = (r1 :> M_Leader @@ r2 :> M_Follower @@ r3 :> M_Follower)
+/\ leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
+/\ allLogs = { <<>>,
+  <<[term |-> 2, value |-> v2]>>,
+  <<[term |-> 2, value |-> v2], [term |-> 2, value |-> v1]>>,
+  << [term |-> 2, value |-> v2],
+     [term |-> 2, value |-> v1],
+     [term |-> 2, value |-> v3] >> }
+/\ commitIndex = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
+/\ votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ maxc = 3
+/\ nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 3 @@ r3 :> 2) @@
+  r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
+  r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
+/\ votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
+/\ voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
+/\ votedFor = (r1 :> M_Nil @@ r2 :> r1 @@ r3 :> r1)
