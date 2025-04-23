@@ -324,5 +324,19 @@ DropMessage(m) ==
     /\ Discard(m)
     /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
 
+\* Model the Switch multicast
+SwitchDeliver(v) ==             \* v ∈ Value
+    /\ LET msg == [ mtype   |-> ClientPayload
+                   , mid     |-> maxc + 1      \* unique request id
+                   , mpayload|-> v
+                   , msource |-> "switch"      \* synthetic id
+                   , mdest   |-> Server        \* broadcast
+                   ]
+       IN  Send(msg)
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars,
+                   logVars, unorderedPayloads,
+                   maxc, leaderCount, entryCommitStats>>
+
+
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
