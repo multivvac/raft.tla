@@ -27,5 +27,16 @@ CONSTANTS MaxBecomeLeader
 \* Maximum term number allowed in the model
 CONSTANTS MaxTerm
 
+\* <id, data> from Switch -> all servers
+CONSTANTS ClientPayload
+
+\* <id> Leader -> followers
+CONSTANTS OrderMeta
+
+\* follower -> leader/peer
+CONSTANTS RecoveryRequest
+
+\* reply with missing payload
+CONSTANTS RecoveryResponse
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
