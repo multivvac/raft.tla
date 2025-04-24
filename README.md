@@ -1,6 +1,6 @@
 # HovercRaft
 
-## data-paths
+## Data-paths
   * Added `SwitchMulticast`, `ReceiveClientPayload`, `RequestRecovery/HandleRecovery*` actions.  
   * Introduced per-node buffers `payloadBuf` and `missingPayload` for unordered payloads.
 

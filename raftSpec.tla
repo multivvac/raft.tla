@@ -58,12 +58,28 @@ MyNext ==
 \*           \/ \E m \in {msg \in ValidMessage(messages) : 
 \*                    msg.mtype \in {RequestVoteRequest}} : DropMessage(m)
 
+HoverNext ==
+        \/ MyNext  \* original vanilla Raft steps
+        \/ \E v \in Value : SwitchMulticast(v)
+        \/ \E m \in { msg \in ValidMessage(messages) : msg.mtype = ClientPayload } :
+              ReceiveClientPayload(m)
+        \/ \E m \in { msg \in ValidMessage(messages) : msg.mtype = RecoveryRequest } :
+              HandleRecoveryRequest(m.mdest, m)
+        \/ \E m \in { msg \in ValidMessage(messages) : msg.mtype = RecoveryResponse } :
+              HandleRecoveryResponse(m)
+        \* RequestRecovery is enabled internally by any follower needing it
+        \/ \E i,j \in Server, idx \in 1..2 : RequestRecovery(i,j,idx)
 
 \* The specification must start with the initial state and transition according
 \* to Next.
 Spec == Init /\ [][Next]_vars
 
 MySpec == MyInit /\ [][MyNext]_vars
+
+\*---------------------------------------------------------------------------
+\*  Spec & invariants                                                        
+\*---------------------------------------------------------------------------
+HoverSpec == HoverInit /\ [][HoverNext]_varsH
 
 \* -------------------- Invariants --------------------
 
@@ -97,6 +113,13 @@ LogInv ==
     \A i, j \in Server :
         \/ CheckIsPrefix(Committed(i),Committed(j)) 
         \/ CheckIsPrefix(Committed(j),Committed(i))
+
+\*  Safety extension: Only commit with payload available everywhere counted.
+CommittedPayloadInv ==
+    \A i \in Server :
+        \A idx \in 1..commitIndex[i] : HasPayload(i, idx)
+
+THEOREM HoverSpec => ([]LogInv /\ []LeaderCompletenessInv /\ []LogMatchingInv /\ []MoreThanOneLeaderInv /\  []CommittedPayloadInv)
 
 \* Note that LogInv checks for safety violations across space
 \* This is a key safety invariant and should always be checked

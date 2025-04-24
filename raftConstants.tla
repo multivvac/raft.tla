@@ -27,5 +27,12 @@ CONSTANTS MaxBecomeLeader
 \* Maximum term number allowed in the model
 CONSTANTS MaxTerm
 
+\*---------------------------------------------------------------------------
+\*  New message kinds                                                         
+\*---------------------------------------------------------------------------
+CONSTANTS ClientPayload,     \* client -> server, carries large request value
+          RecoveryRequest,   \* follower -> any, ask for <<idx,term>> payload
+          RecoveryResponse   \* peer -> follower, ships missing payload
+
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
