@@ -48,6 +48,10 @@ MyInit ==
     /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize here too
 
+InitPayloadBuf == payloadBuf = [ i \in Server |-> << >> ]
+
+HoverInit == Init /\ InitPayloadBuf
+
 \* to be used directly in model Init the value
 \*MyInit2 ==
 \*    /\  commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
