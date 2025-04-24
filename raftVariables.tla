@@ -67,5 +67,11 @@ leaderVars == <<nextIndex, matchIndex>>
 \* All variables; used for stuttering (asserting state hasn't changed).
 vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
 
+\*---------------------------------------------------------------------------
+\*  Additional state                                                          
+\*---------------------------------------------------------------------------
+VARIABLE payloadBuf   \* [Server -> Seq(Value)] – unordered payload cache
+\* All variables, including the new one, for temporal stuttering              
+varsH == vars \o << payloadBuf >>
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
