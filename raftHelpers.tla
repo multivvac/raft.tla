@@ -76,8 +76,7 @@ Symmetry == Permutations(Server)
 HasPayload(i, idx) == \E v \in payloadBuf[i] : \* assumes value itself is the key
                        \A j \in DOMAIN log[i] : j = idx => v = log[i][j].value
 
-OtherUnchanged == UNCHANGED << messages,
-                                serverVars,
+OtherUnchanged == UNCHANGED << serverVars,
                                 candidateVars,
                                 leaderVars,
                                 logVars,

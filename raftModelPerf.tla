@@ -38,9 +38,34 @@ EntryCommitAckQuorumInv ==
         LET stats == entryCommitStats[key]
         IN stats.committed => (stats.ackCount >= MinFollowerAcksForMajority)
 
+
+HoverNext ==
+        \/ MyNext  \* original vanilla Raft steps
+        \/ \E v \in Value : SwitchMulticast(v)
+        \/ \E m \in { msg \in ValidMessage(messages) : msg.mtype = ClientPayload } :
+              ReceiveClientPayload(m)
+        \/ \E m \in { msg \in ValidMessage(messages) : msg.mtype = RecoveryRequest } :
+              HandleRecoveryRequest(m.mdest, m)
+        \/ \E m \in { msg \in ValidMessage(messages) : msg.mtype = RecoveryResponse } :
+              HandleRecoveryResponse(m)
+        \* RequestRecovery is enabled internally by any follower needing it
+        \/ \E i,j \in Server, idx \in 1..2 : RequestRecovery(i,j,idx)
+
+\*---------------------------------------------------------------------------
+\*  Spec & invariants                                                        
+\*---------------------------------------------------------------------------
+HoverSpec == HoverInit /\ [][HoverNext]_varsH
+
 \* fake inv to obtain a trace
 LeaderCommitted ==
     \E i \in Server : commitIndex[i] /= 1 \*
+
+\*  Safety extension: Only commit with payload available everywhere counted.
+CommittedPayloadInv ==
+    \A i \in Server :
+        \A idx \in 1..commitIndex[i] : HasPayload(i, idx)
+
+THEOREM HoverSpec => ([]LogInv /\ []LeaderCompletenessInv /\ []LogMatchingInv /\ []MoreThanOneLeaderInv /\  []CommittedPayloadInv)
 
 \*Modify LeaderCommited == \E i \in Server : commitIndex[i] /= 1
 \*and run with MySpec OR
