@@ -125,7 +125,20 @@ DropStaleResponse(i, j, m) ==
 \***************************** AppendEntries **********************************************
 
 \* Modified. Leader i receives a client request to add v to the log. up to MaxClientRequests.
-ClientRequest(i, v) ==
+
+\* So with the req, we can multicast here
+\* Log of switch?
+\* switch have same data structure
+\* make the switch a server? no new structure
+\* in that case: switch == server
+\* system -> logs -> switchLog -> switchIndexes
+\* switch knows whose the leader
+\* just consider normal case
+\* sth like switch client request
+\* datastructure: <term value payload>, term + value = key
+\* client requestswitch
+\* replicate to followers
+ClientRequest(i,v) ==
     /\ state[i] = Leader
     /\ maxc < MaxClientRequests 
     /\ LET entryTerm == currentTerm[i]
@@ -146,6 +159,9 @@ ClientRequest(i, v) ==
 \* Modified. Leader i sends j an AppendEntries request containing exactly 1 entry. It was up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
+
+\* duplicate
+\* swtich and normal server
 AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
