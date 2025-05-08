@@ -135,9 +135,11 @@ DropStaleResponse(i, j, m) ==
 \* switch knows whose the leader
 \* just consider normal case
 \* sth like switch client request
-\* datastructure: <term value payload>, term + value = key
+\* datastructure: <term value payload>, term + value = key, <term,value> = metadata
 \* client requestswitch
 \* replicate to followers
+\* fake inv, maxc != sizeof (server)
+\* < switchindex, leaderindex > 
 ClientRequest(i,v) ==
     /\ state[i] = Leader
     /\ maxc < MaxClientRequests 
@@ -146,6 +148,7 @@ ClientRequest(i,v) ==
            entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
            newLog == IF entryExists THEN log[i] ELSE Append(log[i], entry)
            newEntryIndex == Len(log[i]) + 1
+           \* why we need newEntryIndex with entryTerm here?
            newEntryKey == <<newEntryIndex, entryTerm>>
        IN
         /\ log' = [log EXCEPT ![i] = newLog]
@@ -156,6 +159,26 @@ ClientRequest(i,v) ==
               ELSE entryCommitStats
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount>>
 
+SwitchClientRequest(i,v) ==
+ IF state[i] = Switch THEN
+    /\ maxc < MaxClientRequests 
+    /\ LET entryTerm == currentTerm[i]
+           entry == [term |-> entryTerm, value |-> v, payload |-> Payload]
+           entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
+           newLog == IF entryExists THEN log[i] ELSE Append(log[i], entry)
+           newEntryIndex == Len(log[i]) + 1
+           newEntryKey == <<newEntryIndex, entryTerm>>
+       IN
+        /\ log' = [log EXCEPT ![i] = newLog]
+        /\ maxc' = IF entryExists THEN maxc ELSE maxc + 1
+        /\ entryCommitStats' =
+              IF ~entryExists /\ newEntryIndex > 0
+              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ])
+              ELSE entryCommitStats
+        /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount>>
+  ELSE
+    /\ IF state[i] = Leader THEN 
+        /\ 
 \* Modified. Leader i sends j an AppendEntries request containing exactly 1 entry. It was up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.

@@ -86,7 +86,7 @@ LeaderCommitted ==
     mtype |-> AppendEntriesRequest,
     mterm |-> 2,
     mlog |-> <<[term |-> 2, value |-> "v1"], [term |-> 2, value |-> "v2"]>>,
-    mprevLogIndex |-> 0,
+    mprevLogIndex |-> 0,     /\ PrintT("MyInit: Servers=" \o ToString(ServerSet4))
     mprevLogTerm |-> 0,
     mentries |-> <<[term |-> 2, value |-> "v1"]>>,
     mcommitIndex |-> 0 ] :>

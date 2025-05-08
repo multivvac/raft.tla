@@ -27,10 +27,11 @@ Init == /\ messages = [m \in {} |-> 0]
 
 \* MyInit remains unchanged for the core Raft state, entryCommitStats is handled in Init.
 MyInit ==
-    LET ServerIds == CHOOSE ids \in [1..3 -> Server] : TRUE
+    LET ServerIds == CHOOSE ids \in [2..4 -> Server] : TRUE
         r1 == ServerIds[1]
         r2 == ServerIds[2]
         r3 == ServerIds[3]
+        r4 == ServerIds[4]
     IN
     /\ commitIndex = [s \in Server |-> 0]
     /\ currentTerm = [s \in Server |-> 2]
@@ -40,7 +41,11 @@ MyInit ==
     /\ maxc = 0
     /\ messages = [m \in {} |-> 0]  \* Start with empty messages
     /\ nextIndex = [s \in Server |-> [t \in Server |-> 1]]
-    /\ state = [s \in Server |-> IF s = r2 THEN Leader ELSE Follower]
+    /\ state = [s \in Server |-> IF s = r2 THEN Leader ELSE IF s = r1 THEN Switch ELSE Follower]
+    /\ switchBuffer = [ v1 |-> [term |-> 2, value |-> "v1", payload |-> "v1"], v2 |-> [term |-> 2, value |-> "v2", payload |-> "v2"] ]
+    /\ switchIndex = "r1"
+    /\ switchSentRecord = [r1 |-> {}, r2 |-> { <<"v1", 2>>, <<"v2", 2>> }, r3 |-> { <<"v1", 2>>, <<"v2", 2>> }, r4 |-> { <<"v1", 2>>, <<"v2", 2>> }]
+    /\ unorderedRequests = [r1 |-> {"v1", "v2"}, r2 |-> {"v1", "v2"}, r3 |-> {"v1", "v2"}, r4 |-> {"v1", "v2"}]
     /\ votedFor = [s \in Server |-> IF s = r2 THEN Nil ELSE r2]
     /\ voterLog = [s \in Server |-> IF s = r2 THEN (r1 :> <<>> @@ r3 :> <<>>) ELSE <<>>]
     /\ votesGranted = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]

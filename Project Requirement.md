@@ -38,3 +38,28 @@ with the ordering metadata received from the leader.
 Bonus Requirement: A recovery mechanism (recovery_request message) must exist for followers to fetch 
 
 missing client requests (due to unreliable multicast) from the leader or other followers.
+
+Note April 25:
+
+Notes on design on how you enter a client request into the system
+
+entry == [term |-> entryTerm, value |-> v] - represents metadata
+
+term comes from leader, entryTerm == currentTerm[i], where i is the Leader
+value is some index from the Value set
+
+entryWithPayload == [term |-> entryTerm, value |-> v, payload |-> v] - this is what goes from Switch to the other Servers
+
+from Leader to Followers we only send the metadata [term |-> entryTerm, value |-> v]
+
+SwitchClientRequest
+
+where
+
+Switch is a fourth Server - switchIndex variable to initialize in MyInit
+
+switchIndex should be initialized in MyInit
+
+SwitchClientRequest
+
+you have to use entryWithPayload and update the log[switchIndex]
