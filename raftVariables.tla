@@ -67,5 +67,23 @@ leaderVars == <<nextIndex, matchIndex>>
 \* All variables; used for stuttering (asserting state hasn't changed).
 vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
 
+\* index into Server
+VARIABLE switchIndex
+
+\* Temporary storage for requests received by the switch before they're ordered
+\* Maps request value to the full payload entry
+VARIABLE switchBuffer
+
+
+\* Each server's buffer of unordered requests received from the switch
+\* Maps from Server to a set of request values pending ordering
+VARIABLE unorderedRequests
+
+\* Records which <<value, term>> pairs the current switch has sent to each server.
+\* Maps Server ID -> Set of <<Value, Term>> pairs.
+VARIABLE switchSentRecord
+\* New HovercRaft variables
+hovercraftVars == <<switchBuffer, unorderedRequests, switchIndex, switchSentRecord>>
+
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu

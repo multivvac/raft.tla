@@ -159,26 +159,69 @@ ClientRequest(i,v) ==
               ELSE entryCommitStats
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount>>
 
-SwitchClientRequest(i,v) ==
- IF state[i] = Switch THEN
-    /\ maxc < MaxClientRequests 
+SwitchClientRequestReplicate(switchIndex, i, v) ==
+  /\ state[switchIndex] = Switch
+        \* Only the Switch may do this
+  /\ i \in Servers
+        \* Only replicate to a Raft peer
+  /\ v \in DOMAIN switchBuffer
+        \* Only replicate requests already ingested into the Switch’s buffer
+  /\ ~(<< v, switchBuffer[v].term >> \in switchSentRecord[i])
+        \* Don’t send the same (value,term) pair more than once
+
+  \* Record that we’ve sent “v in term T” to i
+  /\ switchSentRecord' =
+       [ switchSentRecord EXCEPT
+           ![i] = switchSentRecord[i] \cup { << v, switchBuffer[v].term >> } ]
+
+  \* Pre-install the payload into i’s cache of unordered requests
+  /\ unorderedRequests' =
+       [ unorderedRequests EXCEPT
+           ![i] = unorderedRequests[i] \cup  { v } ]
+
+  /\ UNCHANGED << vars, switchBuffer, switchIndex>>
+
+
+LeaderIngestHovercRaftRequest(i, v) ==
+    /\ state[i] = Leader
+    /\ maxc < MaxClientRequests
+    /\ v \in DOMAIN switchBuffer
+    /\ << v, switchBuffer[v].term >> \in switchSentRecord[leader]
+      \* only ingest requests that the Switch has sent you
     /\ LET entryTerm == currentTerm[i]
-           entry == [term |-> entryTerm, value |-> v, payload |-> Payload]
+           entry == [term |-> entryTerm, value |-> v]
            entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
            newLog == IF entryExists THEN log[i] ELSE Append(log[i], entry)
            newEntryIndex == Len(log[i]) + 1
+           \* why we need newEntryIndex with entryTerm here?
            newEntryKey == <<newEntryIndex, entryTerm>>
        IN
         /\ log' = [log EXCEPT ![i] = newLog]
         /\ maxc' = IF entryExists THEN maxc ELSE maxc + 1
         /\ entryCommitStats' =
-              IF ~entryExists /\ newEntryIndex > 0
-              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ])
+              IF ~entryExists /\ newEntryIndex > 0 \* Only add stats for truly new entries
+              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 1, committed |-> FALSE ])
               ELSE entryCommitStats
-        /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount>>
-  ELSE
-    /\ IF state[i] = Leader THEN 
-        /\ 
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount, hovercraftVars>>
+
+SwitchClientRequest(switchIndex, i, v) ==
+  /\ state[i] = Leader
+        \* only accept a new request when there is a live leader to serve it
+  /\ v \in DOMAIN switchBuffer
+        \* v must be “fresh” (not already in our buffer)
+  /\ switchBuffer' = [ switchBuffer  
+                         EXCEPT ![v] = [term    |-> currentTerm[switchIndex],
+                                        value   |-> v,
+                                        payload |-> v        ] ]
+        \* stash the full {term, value, payload} under key v
+  /\ unorderedRequests' = [ unorderedRequests
+                             EXCEPT ![switchIndex] = unorderedRequests[switchIndex] \cup {v} ]
+        \* remember “v” in our own cache of unordered requests
+  /\ UNCHANGED << vars, switchIndex, switchSentRecord >>
+        \* everything else stays the same
+
+
+
 \* Modified. Leader i sends j an AppendEntries request containing exactly 1 entry. It was up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
@@ -219,7 +262,7 @@ AppendEntries(i, j) ==
             IF entryKey \in DOMAIN entryCommitStats /\ ~entryCommitStats[entryKey].committed
             THEN [entryCommitStats EXCEPT ![entryKey].sentCount = @ + 1]
             ELSE entryCommitStats         
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, hovercraftVars>>
 
 \* Server i receives an AppendEntries request from server j with
 \* m.mterm <= currentTerm[i]. This just handles m.entries of length 0 or 1, but
@@ -269,6 +312,10 @@ HandleAppendEntriesRequest(i, j, m) ==
 \*                                                Min({m.mcommitIndex, Len(log[i])}) 
 \*                                            ELSE 
 \*                                                commitIndex[i]]
+                       /\ LET v == entry.value
+                          IN
+                            /\ entry.value \in unorderedRequests[i]
+                            /\ unorderedRequests' = [ unorderedRequests EXCEPT ![i] = unorderedRequests[i] \ { v } ]
                        /\ Reply([mtype           |-> AppendEntriesResponse,
                                  mterm           |-> currentTerm[i],
                                  msuccess        |-> TRUE,
@@ -295,7 +342,7 @@ HandleAppendEntriesRequest(i, j, m) ==
                        /\ log' = [log EXCEPT ![i] =
                                       Append(log[i], m.mentries[1])]
                        /\ UNCHANGED <<serverVars, commitIndex, messages>>
-       /\ UNCHANGED <<candidateVars, leaderVars, instrumentationVars>> \* entryCommitStats unchanged on followers
+       /\ UNCHANGED <<candidateVars, leaderVars, instrumentationVars, switchIndex, switchBuffer, switchSentRecord>> \* entryCommitStats unchanged on followers
 
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].

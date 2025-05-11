@@ -36,6 +36,7 @@ MyInit ==
     /\ commitIndex = [s \in Server |-> 0]
     /\ currentTerm = [s \in Server |-> 2]
     /\ leaderCount = [s \in Server |-> IF s = r2 THEN 1 ELSE 0]
+    \* log[i] is the sequence of records
     /\ log = [s \in Server |-> <<>>]
     /\ matchIndex = [s \in Server |-> [t \in Server |-> 0]]
     /\ maxc = 0
