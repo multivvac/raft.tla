@@ -59,14 +59,14 @@ MyNext ==
 \*                    msg.mtype \in {RequestVoteRequest}} : DropMessage(m)
 
 MySwitchNext == 
-   \/ \E i \in Servers, v \in Value : 
-    state[i] = Leader /\ SwitchClientRequest(switchIndex, i, v)
-   \/ \E i \in Servers, v \in DOMAIN switchBuffer : 
-    SwitchClientRequestReplicate(switchIndex, i, v)
-   \/ \E i \in Servers, v \in DOMAIN switchBuffer : 
+   \/ \E i \in Server, v \in Value : 
+    state[i] = Leader /\ SwitchClientRequest(i, v)
+   \/ \E i \in Server, v \in DOMAIN switchBuffer : 
+    SwitchClientRequestReplicate(i, v)
+   \/ \E i \in Server, v \in DOMAIN switchBuffer : 
     state[i] = Leader /\ LeaderIngestHovercRaftRequest(i, v)
-   \/ \E i \in Servers : AdvanceCommitIndex(i)
-   \/ \E i,j \in Servers : i /= j /\ AppendEntries(i, j)
+   \/ \E i \in Server : AdvanceCommitIndex(i)
+   \/ \E i,j \in Server : i /= j /\ AppendEntries(i, j)
    \/ \E m \in {msg \in ValidMessage(messages) : msg.mtype \in 
     {AppendEntriesRequest, AppendEntriesResponse}} : Receive(m)
 

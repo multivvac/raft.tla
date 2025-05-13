@@ -27,8 +27,8 @@ CONSTANTS MaxBecomeLeader
 \* Maximum term number allowed in the model
 CONSTANTS MaxTerm
 
-\* Represent payload
-CONSTANTS Payload
+\* \* Represent payload
+\* CONSTANTS Payload
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu

@@ -159,13 +159,8 @@ ClientRequest(i,v) ==
               ELSE entryCommitStats
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount>>
 
-SwitchClientRequestReplicate(switchIndex, i, v) ==
-  /\ state[switchIndex] = Switch
-        \* Only the Switch may do this
-  /\ i \in Servers
-        \* Only replicate to a Raft peer
-  /\ v \in DOMAIN switchBuffer
-        \* Only replicate requests already ingested into the Switch’s buffer
+SwitchClientRequestReplicate(i, v) ==
+  /\ state[i] /= Switch
   /\ ~(<< v, switchBuffer[v].term >> \in switchSentRecord[i])
         \* Don’t send the same (value,term) pair more than once
 
@@ -179,14 +174,14 @@ SwitchClientRequestReplicate(switchIndex, i, v) ==
        [ unorderedRequests EXCEPT
            ![i] = unorderedRequests[i] \cup  { v } ]
 
-  /\ UNCHANGED << vars, switchBuffer, switchIndex>>
+  /\ UNCHANGED << vars, switchBuffer, switchIndex >>
 
 
 LeaderIngestHovercRaftRequest(i, v) ==
     /\ state[i] = Leader
     /\ maxc < MaxClientRequests
     /\ v \in DOMAIN switchBuffer
-    /\ << v, switchBuffer[v].term >> \in switchSentRecord[leader]
+    /\ << v, switchBuffer[v].term >> \in switchSentRecord[i]
       \* only ingest requests that the Switch has sent you
     /\ LET entryTerm == currentTerm[i]
            entry == [term |-> entryTerm, value |-> v]
@@ -204,15 +199,19 @@ LeaderIngestHovercRaftRequest(i, v) ==
               ELSE entryCommitStats
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount, hovercraftVars>>
 
-SwitchClientRequest(switchIndex, i, v) ==
+SwitchClientRequest(i, v) ==
   /\ state[i] = Leader
         \* only accept a new request when there is a live leader to serve it
-  /\ v \in DOMAIN switchBuffer
+  /\ ~(v \in DOMAIN switchBuffer)
         \* v must be “fresh” (not already in our buffer)
-  /\ switchBuffer' = [ switchBuffer  
-                         EXCEPT ![v] = [term    |-> currentTerm[switchIndex],
-                                        value   |-> v,
-                                        payload |-> v        ] ]
+\*   /\ switchBuffer' = [ switchBuffer  
+\*                          EXCEPT ![v] = [term    |-> currentTerm[switchIndex],
+\*                                         value   |-> v,
+\*                                         payload |-> v        ] ]
+
+  /\ switchBuffer' = switchBuffer @@ (v :> [term    |-> currentTerm[switchIndex],
+                                           value   |-> v,
+                                           payload |-> v        ])
         \* stash the full {term, value, payload} under key v
   /\ unorderedRequests' = [ unorderedRequests
                              EXCEPT ![switchIndex] = unorderedRequests[switchIndex] \cup {v} ]
@@ -286,12 +285,12 @@ HandleAppendEntriesRequest(i, j, m) ==
                        msource         |-> i,
                        mdest           |-> j],
                        m)
-             /\ UNCHANGED <<serverVars, logVars>>
+             /\ UNCHANGED <<serverVars, logVars, unorderedRequests>>
           \/ \* return to follower state
              /\ m.mterm = currentTerm[i]
              /\ state[i] = Candidate
              /\ state' = [state EXCEPT ![i] = Follower]
-             /\ UNCHANGED <<currentTerm, votedFor, logVars, messages>>
+             /\ UNCHANGED <<currentTerm, votedFor, logVars, messages, unorderedRequests>>
           \/ \* accept request
              /\ m.mterm = currentTerm[i]
              /\ state[i] = Follower
@@ -312,7 +311,9 @@ HandleAppendEntriesRequest(i, j, m) ==
 \*                                                Min({m.mcommitIndex, Len(log[i])}) 
 \*                                            ELSE 
 \*                                                commitIndex[i]]
-                       /\ LET v == entry.value
+                       /\ LET 
+                             entry == m.mentries[1]
+                             v == entry.value
                           IN
                             /\ entry.value \in unorderedRequests[i]
                             /\ unorderedRequests' = [ unorderedRequests EXCEPT ![i] = unorderedRequests[i] \ { v } ]
@@ -335,13 +336,13 @@ HandleAppendEntriesRequest(i, j, m) ==
 \*                       /\ LET new == [index2 \in 1..(Len(log[i]) - 1) |->
 \*                                          log[i][index2]]
 \*                          IN log' = [log EXCEPT ![i] = new]
-                       /\ UNCHANGED <<serverVars, commitIndex, messages>>
+                       /\ UNCHANGED <<serverVars, commitIndex, messages, unorderedRequests>>
                    \/ \* no conflict: append entry
                        /\ m.mentries /= << >>
                        /\ Len(log[i]) = m.mprevLogIndex
                        /\ log' = [log EXCEPT ![i] =
                                       Append(log[i], m.mentries[1])]
-                       /\ UNCHANGED <<serverVars, commitIndex, messages>>
+                       /\ UNCHANGED <<serverVars, commitIndex, messages, unorderedRequests>>
        /\ UNCHANGED <<candidateVars, leaderVars, instrumentationVars, switchIndex, switchBuffer, switchSentRecord>> \* entryCommitStats unchanged on followers
 
 \* Server i receives an AppendEntries response from server j with
@@ -402,7 +403,7 @@ AdvanceCommitIndex(i) ==
                    IF key \in keysToUpdate
                    THEN [ entryCommitStats[key] EXCEPT !.committed = TRUE ] \* Update record
                    ELSE entryCommitStats[key] ]                             \* Keep old record       
-    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, log, maxc, leaderCount>>
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, log, maxc, leaderCount, hovercraftVars>>
 
 \* Network state transitions
 

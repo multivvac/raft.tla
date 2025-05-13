@@ -144,7 +144,7 @@ InitServerVars == /\ currentTerm = [i \in Server |-> 1]
                   /\ state       = [i \in Server |-> Follower]
                   /\ votedFor    = [i \in Server |-> Nil]
 InitCandidateVars == /\ votesResponded = [i \in Server |-> {}]
-                     /\ votesGranted   = [i \in Server |-> {}]
+                     /\ votesGranted   = [i \in  |-> {}]
 \* The values nextIndex[i][i] and matchIndex[i][i] are never read, since the
 \* leader does not send itself messages. It's still easier to include these
 \* in the functions.

@@ -42,6 +42,10 @@ EntryCommitAckQuorumInv ==
 LeaderCommitted ==
     \E i \in Server : commitIndex[i] /= 1 \*
 
+\* fake invariant to check the first two actions in MySwitchNext
+AllServersHaveOneUnorderedRequestInv ==
+    \E s \in Server :  Cardinality(unorderedRequests[s]) /= 2
+
 \*Modify LeaderCommited == \E i \in Server : commitIndex[i] /= 1
 \*and run with MySpec OR
 
