@@ -62,7 +62,7 @@ MySwitchNext ==
    \/ \E i \in Server, v \in Value : 
     state[i] = Leader /\ SwitchClientRequest(i, v)
    \/ \E i \in Server, v \in DOMAIN switchBuffer : 
-    SwitchClientRequestReplicate(i, v)
+    state[i] /= Switch /\ SwitchClientRequestReplicate(i, v)
    \/ \E i \in Server, v \in DOMAIN switchBuffer : 
     state[i] = Leader /\ LeaderIngestHovercRaftRequest(i, v)
    \/ \E i \in Server : AdvanceCommitIndex(i)
@@ -72,11 +72,11 @@ MySwitchNext ==
 
 \* The specification must start with the initial state and transition according
 \* to Next.
-Spec == Init /\ [][Next]_vars
+\* Spec == Init /\ [][Next]_vars
 
-MySpec == MyInit /\ [][MyNext]_vars
+\* MySpec == MyInit /\ [][MyNext]_vars
 
-MySwitchSpec == MyInit /\ [][MySwitchNext]_vars
+MySwitchSpec == MyInit /\ [][MySwitchNext]_avars
 
 \* -------------------- Invariants --------------------
 
@@ -113,7 +113,7 @@ LogInv ==
 
 \* Note that LogInv checks for safety violations across space
 \* This is a key safety invariant and should always be checked
-THEOREM Spec => ([]LogInv /\ []LeaderCompletenessInv /\ []LogMatchingInv /\ []MoreThanOneLeaderInv) 
+THEOREM MySwitchSpec => ([]LogInv /\ []LeaderCompletenessInv /\ []LogMatchingInv /\ []MoreThanOneLeaderInv) 
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu

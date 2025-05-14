@@ -54,7 +54,7 @@ MyInit ==
     /\ switchBuffer = [ x \in {} |-> [term |-> 0, value |-> "", payload |-> ""] ]
     \* /\ switchBuffer = [ v1 |-> [term |-> 2, value |-> "v1", payload |-> "v1"], v2 |-> [term |-> 2, value |-> "v2", payload |-> "v2"] ]
     \* /\ switchSentRecord = [r1 |-> {}, r2 |-> { <<"v1", 2>>, <<"v2", 2>> }, r3 |-> { <<"v1", 2>>, <<"v2", 2>> }, r4 |-> { <<"v1", 2>>, <<"v2", 2>> }]
-    /\ switchSentRecord = [s \in Server |-> IF  s = r1 THEN {} ELSE {}]
+    /\ switchSentRecord = [s \in Server |-> {}]
     /\ unorderedRequests = [s \in Server |-> {}]
     \* /\ unorderedRequests = [r1 |-> {"v1", "v2"}, r2 |-> {"v1", "v2"}, r3 |-> {"v1", "v2"}, r4 |-> {"v1", "v2"}]
     /\ votedFor = [s \in Server |-> IF s = r2 THEN Nil ELSE r2]

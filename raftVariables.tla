@@ -85,5 +85,7 @@ VARIABLE switchSentRecord
 \* New HovercRaft variables
 hovercraftVars == <<switchBuffer, unorderedRequests, switchIndex, switchSentRecord>>
 
+avars == <<vars, hovercraftVars>>
+
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
