@@ -176,7 +176,8 @@ SwitchClientRequestReplicate(i, v) ==
 
   /\ UNCHANGED << vars, switchBuffer, switchIndex >>
 
-
+\* NetAgg is a server
+\* NetAgg is doing replicate
 LeaderIngestHovercRaftRequest(i, v) ==
     /\ maxc < MaxClientRequests
     /\ v \in DOMAIN switchBuffer
@@ -226,6 +227,12 @@ SwitchClientRequest(i, v) ==
 
 \* duplicate
 \* swtich and normal server
+
+\* i in netAgg, check state is netagg
+\* j should be in set of follower
+\* netagg -> follower
+\* netagg is a server with same structure as leader
+\* 
 AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
@@ -266,6 +273,12 @@ AppendEntries(i, j) ==
 \* m.mterm <= currentTerm[i]. This just handles m.entries of length 0 or 1, but
 \* implementations could safely accept more by treating them the same as
 \* multiple independent requests of 1 entry.
+
+\* i can be follower
+
+\* follower validated
+
+\* from netagg to follower
 HandleAppendEntriesRequest(i, j, m) ==
     LET logOk == \/ m.mprevLogIndex = 0
                  \/ /\ m.mprevLogIndex > 0
@@ -375,6 +388,8 @@ HandleAppendEntriesResponse(i, j, m) ==
 \* This is done as a separate step from handling AppendEntries responses,
 \* in part to minimize atomic regions, and in part so that leaders of
 \* single-server clusters are able to mark entries committed.
+
+\* handler by leader, leader -> netagg, netagg -: leader
 AdvanceCommitIndex(i) ==
     /\ state[i] = Leader
     /\ LET \* The set of servers that agree up through index.
