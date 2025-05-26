@@ -57,7 +57,7 @@ UpdateTerm(i, j, m) ==
     /\ state'          = [state       EXCEPT ![i] = Follower]
     /\ votedFor'       = [votedFor    EXCEPT ![i] = Nil]
        \* messages is unchanged so m can be processed further.
-    /\ UNCHANGED <<messages, candidateVars, leaderVars, logVars, instrumentationVars>>
+    /\ UNCHANGED <<messages, candidateVars, leaderVars, logVars, instrumentationVars, hovercraftVars>>
 
 \***************************** REQUEST VOTE **********************************************
 \* Message handlers
@@ -73,7 +73,7 @@ RequestVote(i, j) ==
              mlastLogIndex |-> Len(log[i]),
              msource       |-> i,
              mdest         |-> j])
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars, payloadBuf>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars, hovercraftVars>>
 
 \* Server i receives a RequestVote request from server j with
 \* m.mterm <= currentTerm[i].
@@ -96,7 +96,7 @@ HandleRequestVoteRequest(i, j, m) ==
                  msource      |-> i,
                  mdest        |-> j],
                  m)
-       /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, instrumentationVars>>
+       /\ UNCHANGED <<state, currentTerm, candidateVars, leaderVars, logVars, instrumentationVars, hovercraftVars>>
 
 \* Server i receives a RequestVote response from server j with
 \* m.mterm = currentTerm[i].
@@ -112,40 +112,127 @@ HandleRequestVoteResponse(i, j, m) ==
           /\ voterLog' = [voterLog EXCEPT ![i] =
                               voterLog[i] @@ (j :> m.mlog)]
        \/ /\ ~m.mvoteGranted
-          /\ UNCHANGED <<votesGranted, voterLog>>
+          /\ UNCHANGED <<votesGranted, voterLog, hovercraftVars>>
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, instrumentationVars>>
+    /\ UNCHANGED <<serverVars, votedFor, leaderVars, logVars, instrumentationVars, hovercraftVars>>
 
 \* Responses with stale terms are ignored.
 DropStaleResponse(i, j, m) ==
     /\ m.mterm < currentTerm[i]
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars, hovercraftVars>>
 
 \***************************** AppendEntries **********************************************
 
 \* Modified. Leader i receives a client request to add v to the log. up to MaxClientRequests.
+
+\* So with the req, we can multicast here
+\* Log of switch?
+\* switch have same data structure
+\* make the switch a server? no new structure
+\* in that case: switch == server
+\* system -> logs -> switchLog -> switchIndexes
+\* switch knows whose the leader
+\* just consider normal case
+\* sth like switch client request
+\* datastructure: <term value payload>, term + value = key, <term,value> = metadata
+\* client requestswitch
+\* replicate to followers
+\* fake inv, maxc != sizeof (server)
+\* < switchindex, leaderindex > 
 ClientRequest(i,v) ==
     /\ state[i] = Leader
+    /\ maxc < MaxClientRequests 
+    /\ LET entryTerm == currentTerm[i]
+           entry == [term |-> entryTerm, value |-> v]
+           entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
+           newLog == IF entryExists THEN log[i] ELSE Append(log[i], entry)
+           newEntryIndex == Len(log[i]) + 1
+           \* why we need newEntryIndex with entryTerm here?
+           newEntryKey == <<newEntryIndex, entryTerm>>
+       IN
+        /\ log' = [log EXCEPT ![i] = newLog]
+        /\ maxc' = IF entryExists THEN maxc ELSE maxc + 1
+        /\ entryCommitStats' =
+              IF ~entryExists /\ newEntryIndex > 0 \* Only add stats for truly new entries
+              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ])
+              ELSE entryCommitStats
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount>>
+
+SwitchClientRequestReplicate(i, v) ==
+\*   /\ state[i] /= Switch
+  /\ ~(<< v, switchBuffer[v].term >> \in switchSentRecord[i])
+        \* Don’t send the same (value,term) pair more than once
+
+  \* Record that we’ve sent “v in term T” to i
+  /\ switchSentRecord' =
+       [ switchSentRecord EXCEPT
+           ![i] = switchSentRecord[i] \cup { << v, switchBuffer[v].term >> } ]
+
+  \* Pre-install the payload into i’s cache of unordered requests
+  /\ unorderedRequests' =
+       [ unorderedRequests EXCEPT
+           ![i] = unorderedRequests[i] \cup  { v } ]
+
+  /\ UNCHANGED << vars, switchBuffer, switchIndex >>
+
+\* NetAgg is a server
+\* NetAgg is doing replicate
+LeaderIngestHovercRaftRequest(i, v) ==
     /\ maxc < MaxClientRequests
-    /\ LET entryTerm      == currentTerm[i]
-           entryIndex     == Len(log[i]) + 1
-           entry          == [ term |-> entryTerm,
-                                 value |-> v ]   \*  acts as metadata ref
-           entryExists    == \E j \in DOMAIN log[i] : log[i][j] = entry
-           newLog         == IF entryExists THEN log[i] ELSE Append(log[i], entry)
-       IN /\ log'          = [ log EXCEPT ![i] = newLog ]
-          /\ maxc'         = IF entryExists THEN maxc ELSE maxc + 1
-          /\ messages'     = messages   \* no immediate payload traffic
-          /\ UNCHANGED << serverVars \ {log},
-                          candidateVars,
-                          leaderVars,
-                          instrumentationVars,
-                          payloadBuf >>
+    /\ v \in DOMAIN switchBuffer
+    /\ << v, switchBuffer[v].term >> \in switchSentRecord[i]
+      \* only ingest requests that the Switch has sent you
+    /\ LET entryTerm == currentTerm[i]
+           entry == [term |-> entryTerm, value |-> v, payload |-> switchBuffer[v].payload]
+           entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
+           newLog == IF entryExists THEN log[i] ELSE Append(log[i], entry)
+           newEntryIndex == Len(log[i]) + 1
+           \* why we need newEntryIndex with entryTerm here?
+           newEntryKey == <<newEntryIndex, entryTerm>>
+       IN
+        /\ log' = [log EXCEPT ![i] = newLog]
+        /\ maxc' = IF entryExists THEN maxc ELSE maxc + 1
+        /\ entryCommitStats' =
+              IF ~entryExists /\ newEntryIndex > 0 \* Only add stats for truly new entries
+              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 1, committed |-> FALSE ])
+              ELSE entryCommitStats
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex, leaderCount, hovercraftVars>>
+
+SwitchClientRequest(i, v) ==
+  /\ state[i] = Leader
+        \* only accept a new request when there is a live leader to serve it
+  /\ ~(v \in DOMAIN switchBuffer)
+        \* v must be “fresh” (not already in our buffer)
+\*   /\ switchBuffer' = [ switchBuffer  
+\*                          EXCEPT ![v] = [term    |-> currentTerm[switchIndex],
+\*                                         value   |-> v,
+\*                                         payload |-> v        ] ]
+
+  /\ switchBuffer' = switchBuffer @@ (v :> [term    |-> currentTerm[switchIndex],
+                                           value   |-> v,
+                                           payload |-> v        ])
+        \* stash the full {term, value, payload} under key v
+  /\ unorderedRequests' = [ unorderedRequests
+                             EXCEPT ![switchIndex] = unorderedRequests[switchIndex] \cup {v} ]
+        \* remember “v” in our own cache of unordered requests
+  /\ UNCHANGED << vars, switchIndex, switchSentRecord >>
+        \* everything else stays the same
+
+
 
 \* Modified. Leader i sends j an AppendEntries request containing exactly 1 entry. It was up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
+
+\* duplicate
+\* swtich and normal server
+
+\* i in netAgg, check state is netagg
+\* j should be in set of follower
+\* netagg -> follower
+\* netagg is a server with same structure as leader
+\* 
 AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
@@ -154,7 +241,7 @@ AppendEntries(i, j) ==
     /\ matchIndex[i][j] < nextIndex[i][j] \* Only send if follower hasn't already acknowledged this index
     /\ LET entryIndex == nextIndex[i][j]
            entry == log[i][entryIndex]
-           entries == << entry >>
+           entries == << [term |-> entry.term, value |-> entry.value] >>
            entryKey == <<entryIndex, entry.term>>
            prevLogIndex == entryIndex - 1
            prevLogTerm == IF prevLogIndex > 0 THEN
@@ -180,97 +267,48 @@ AppendEntries(i, j) ==
             IF entryKey \in DOMAIN entryCommitStats /\ ~entryCommitStats[entryKey].committed
             THEN [entryCommitStats EXCEPT ![entryKey].sentCount = @ + 1]
             ELSE entryCommitStats         
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, payloadBuf>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount, hovercraftVars>>
 
 \* Server i receives an AppendEntries request from server j with
 \* m.mterm <= currentTerm[i]. This just handles m.entries of length 0 or 1, but
 \* implementations could safely accept more by treating them the same as
 \* multiple independent requests of 1 entry.
-\* HandleAppendEntriesRequest(i, j, m) ==
-\*     LET logOk == \/ m.mprevLogIndex = 0
-\*                  \/ /\ m.mprevLogIndex > 0
-\*                     /\ m.mprevLogIndex <= Len(log[i])
-\*                     /\ m.mprevLogTerm = log[i][m.mprevLogIndex].term
-\*     IN /\ m.mterm <= currentTerm[i]
-\*        /\ \/ /\ \* reject request
-\*                 \/ m.mterm < currentTerm[i]
-\*                 \/ /\ m.mterm = currentTerm[i]
-\*                    /\ state[i] = Follower
-\*                    /\ \lnot logOk
-\*              /\ Reply([mtype           |-> AppendEntriesResponse,
-\*                        mterm           |-> currentTerm[i],
-\*                        msuccess        |-> FALSE,
-\*                        mmatchIndex     |-> 0,
-\*                        msource         |-> i,
-\*                        mdest           |-> j],
-\*                        m)
-\*              /\ UNCHANGED <<serverVars, logVars>>
-\*           \/ \* return to follower state
-\*              /\ m.mterm = currentTerm[i]
-\*              /\ state[i] = Candidate
-\*              /\ state' = [state EXCEPT ![i] = Follower]
-\*              /\ UNCHANGED <<currentTerm, votedFor, logVars, messages>>
-\*           \/ \* accept request
-\*              /\ m.mterm = currentTerm[i]
-\*              /\ state[i] = Follower
-\*              /\ logOk
-\*              /\ LET index == m.mprevLogIndex + 1
-\*                 IN \/ \* already done with request
-\*                        /\ \/ m.mentries = << >>
-\*                           \/ /\ m.mentries /= << >>
-\*                              /\ Len(log[i]) >= index
-\*                              /\ log[i][index].term = m.mentries[1].term
-\*                           \* This could make our commitIndex decrease (for
-\*                           \* example if we process an old, duplicated request),
-\*                           \* but that doesn't really affect anything.
-\*                        /\ commitIndex' = [commitIndex EXCEPT ![i] =
-\*                                               m.mcommitIndex]   
-\* \*                       /\ commitIndex' = [commitIndex EXCEPT ![i] = 
-\* \*                                            IF commitIndex[i] < m.mcommitIndex THEN 
-\* \*                                                Min({m.mcommitIndex, Len(log[i])}) 
-\* \*                                            ELSE 
-\* \*                                                commitIndex[i]]
-\*                        /\ Reply([mtype           |-> AppendEntriesResponse,
-\*                                  mterm           |-> currentTerm[i],
-\*                                  msuccess        |-> TRUE,
-\*                                  mmatchIndex     |-> m.mprevLogIndex +
-\*                                                      Len(m.mentries),
-\*                                  msource         |-> i,
-\*                                  mdest           |-> j],
-\*                                  m)
-\*                        /\ UNCHANGED <<serverVars, log>>
-\*                    \/ \* conflict: remove 1 entry (simplified from original spec - assumes entry length 1)
-\*                       \* since we do not send empty entries, we have to provide a larger set of values to ensure some progress
-\*                        /\ m.mentries /= << >>
-\*                        /\ Len(log[i]) >= index
-\*                        /\ log[i][index].term /= m.mentries[1].term
-\*                        /\ LET newLog == SubSeq(log[i], 1, index - 1) \* Truncate log
-\*                           IN log' = [log EXCEPT ![i] = newLog]
-\* \*                       /\ LET new == [index2 \in 1..(Len(log[i]) - 1) |->
-\* \*                                          log[i][index2]]
-\* \*                          IN log' = [log EXCEPT ![i] = new]
-\*                        /\ UNCHANGED <<serverVars, commitIndex, messages>>
-\*                    \/ \* no conflict: append entry
-\*                        /\ m.mentries /= << >>
-\*                        /\ Len(log[i]) = m.mprevLogIndex
-\*                        /\ log' = [log EXCEPT ![i] =
-\*                                       Append(log[i], m.mentries[1])]
-\*                        /\ UNCHANGED <<serverVars, commitIndex, messages>>
-\*        /\ UNCHANGED <<candidateVars, leaderVars, instrumentationVars>> \* entryCommitStats unchanged on followers
-HandleAppendEntriesRequest(i,j,m) ==
+
+\* i can be follower
+
+\* follower validated
+
+\* from netagg to follower
+HandleAppendEntriesRequest(i, j, m) ==
     LET logOk == \/ m.mprevLogIndex = 0
-                 \/ /\ m.mprevLogIndex > 0 /\ m.mprevLogIndex <= Len(log[i])
-                    /\ m.mprevLogTerm  = log[i][m.mprevLogIndex].term
-        index   == m.mprevLogIndex + 1
-        ent   == Head(m.mentries)
-    IN /\ m.mtype = AppendEntriesRequest
-       /\ m.mterm = currentTerm[i]
-       /\ state[i] = Follower
-       /\ logOk
-       /\ Len(m.mentries) = 1   \* Stick to single‑entry replication
-       /\ IF HasPayload(i, index)
-             THEN \* identical to vanilla Raft accept‑request branch
-                    \/ \* already done with request
+                 \/ /\ m.mprevLogIndex > 0
+                    /\ m.mprevLogIndex <= Len(log[i])
+                    /\ m.mprevLogTerm = log[i][m.mprevLogIndex].term
+    IN /\ m.mterm <= currentTerm[i]
+       /\ \/ /\ \* reject request
+                \/ m.mterm < currentTerm[i]
+                \/ /\ m.mterm = currentTerm[i]
+                   /\ state[i] = Follower
+                   /\ \lnot logOk
+             /\ Reply([mtype           |-> AppendEntriesResponse,
+                       mterm           |-> currentTerm[i],
+                       msuccess        |-> FALSE,
+                       mmatchIndex     |-> 0,
+                       msource         |-> i,
+                       mdest           |-> j],
+                       m)
+             /\ UNCHANGED <<serverVars, logVars, hovercraftVars>>
+          \/ \* return to follower state
+             /\ m.mterm = currentTerm[i]
+             /\ state[i] = Candidate
+             /\ state' = [state EXCEPT ![i] = Follower]
+             /\ UNCHANGED <<currentTerm, votedFor, logVars, messages, hovercraftVars>>
+          \/ \* accept request
+             /\ m.mterm = currentTerm[i]
+             /\ state[i] = Follower
+             /\ logOk
+             /\ LET index == m.mprevLogIndex + 1
+                IN \/ \* already done with request
                        /\ \/ m.mentries = << >>
                           \/ /\ m.mentries /= << >>
                              /\ Len(log[i]) >= index
@@ -285,6 +323,12 @@ HandleAppendEntriesRequest(i,j,m) ==
 \*                                                Min({m.mcommitIndex, Len(log[i])}) 
 \*                                            ELSE 
 \*                                                commitIndex[i]]
+                       /\ LET 
+                             entry == m.mentries[1]
+                             v == entry.value
+                          IN
+                            /\ entry.value \in unorderedRequests[i]
+                            /\ unorderedRequests' = [ unorderedRequests EXCEPT ![i] = unorderedRequests[i] \ { v } ]
                        /\ Reply([mtype           |-> AppendEntriesResponse,
                                  mterm           |-> currentTerm[i],
                                  msuccess        |-> TRUE,
@@ -293,7 +337,7 @@ HandleAppendEntriesRequest(i,j,m) ==
                                  msource         |-> i,
                                  mdest           |-> j],
                                  m)
-                       /\ UNCHANGED <<serverVars, log>>
+                       /\ UNCHANGED <<serverVars, log, switchIndex, switchBuffer, switchSentRecord>>
                    \/ \* conflict: remove 1 entry (simplified from original spec - assumes entry length 1)
                       \* since we do not send empty entries, we have to provide a larger set of values to ensure some progress
                        /\ m.mentries /= << >>
@@ -304,28 +348,15 @@ HandleAppendEntriesRequest(i,j,m) ==
 \*                       /\ LET new == [index2 \in 1..(Len(log[i]) - 1) |->
 \*                                          log[i][index2]]
 \*                          IN log' = [log EXCEPT ![i] = new]
-                       /\ UNCHANGED <<serverVars, commitIndex, messages>>
+                       /\ UNCHANGED <<serverVars, commitIndex, messages, hovercraftVars>>
                    \/ \* no conflict: append entry
                        /\ m.mentries /= << >>
                        /\ Len(log[i]) = m.mprevLogIndex
                        /\ log' = [log EXCEPT ![i] =
-                                      Append(log[i], m.mentries[1])]
-                       /\ UNCHANGED <<serverVars, commitIndex, messages>>
-             ELSE \* cache miss – keep metadata for later, reply failure so leader retries
-                  /\ Reply([ mtype        |-> AppendEntriesResponse,
-                             mterm        |-> currentTerm[i],
-                             msuccess     |-> FALSE,
-                             mmatchIndex  |-> 0,
-                             msource      |-> i,
-                             mdest        |-> j ], m)
-                  /\ UNCHANGED << log,
-                                  commitIndex,
-                                  messages >>
-       /\ UNCHANGED << serverVars \ {state},
-                       candidateVars,
-                       leaderVars,
-                       payloadBuf,
-                       instrumentationVars >>
+                                      Append(log[i], [term |-> m.mentries[1].term, value |-> m.mentries[1].value, payload |-> switchBuffer[m.mentries[1].value].payload])]
+                       /\ UNCHANGED <<serverVars, commitIndex, messages, hovercraftVars>>
+       /\ UNCHANGED <<candidateVars, leaderVars, instrumentationVars, switchIndex, switchBuffer, switchSentRecord>> \* entryCommitStats unchanged on followers
+
 \* Server i receives an AppendEntries response from server j with
 \* m.mterm = currentTerm[i].
 HandleAppendEntriesResponse(i, j, m) ==
@@ -349,26 +380,45 @@ HandleAppendEntriesResponse(i, j, m) ==
        \/ /\ \lnot m.msuccess \* not successful
           /\ nextIndex' = [nextIndex EXCEPT ![i][j] =
                                Max({nextIndex[i][j] - 1, 1})]
-          /\ UNCHANGED <<matchIndex, entryCommitStats>>
+          /\ UNCHANGED <<matchIndex, entryCommitStats, hovercraftVars>>
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, candidateVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, logVars, maxc, leaderCount, hovercraftVars>>
 
 \* Leader i advances its commitIndex.
 \* This is done as a separate step from handling AppendEntries responses,
 \* in part to minimize atomic regions, and in part so that leaders of
 \* single-server clusters are able to mark entries committed.
+
+\* handler by leader, leader -> netagg, netagg -: leader
 AdvanceCommitIndex(i) ==
     /\ state[i] = Leader
-    /\ LET Agree(index) == { i } \cup { k \in Server : /\ matchIndex[i][k] >= index
-                                              /\ HasPayload(k,index) }
-           agreeIdx    == { index \in 1..Len(log[i]) : Agree(index) \in Quorum }
-           newCI       == IF agreeIdx /= {}
-                            THEN Max(agreeIdx)
-                            ELSE commitIndex[i]
-       IN commitIndex' = [ commitIndex EXCEPT ![i] = newCI ]
-          /\ UNCHANGED << messages, serverVars \ {commitIndex},
-                          candidateVars, leaderVars, logVars \ {commitIndex},
-                          payloadBuf, instrumentationVars >>
+    /\ LET \* The set of servers that agree up through index.
+           Agree(index) == {i} \cup {k \in Server :
+                                         matchIndex[i][k] >= index}
+           \* The maximum indexes for which a quorum agrees
+           agreeIndexes == {index \in 1..Len(log[i]) :
+                                Agree(index) \in Quorum}
+           \* New value for commitIndex'[i]
+           newCommitIndex ==
+              IF /\ agreeIndexes /= {}
+                 /\ log[i][Max(agreeIndexes)].term = currentTerm[i]
+              THEN
+                  Max(agreeIndexes)
+              ELSE
+                  commitIndex[i]
+           committedIndexes == { k \in Nat : /\ k > commitIndex[i]
+                                             /\ k <= newCommitIndex }
+           \* Identify the keys in entryCommitStats corresponding to newly committed entries
+           keysToUpdate == { key \in DOMAIN entryCommitStats : key[1] \in committedIndexes }           
+       IN /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
+          \* Update the 'committed' flag for the relevant entries in entryCommitStats
+          /\ entryCommitStats' =
+               [ key \in DOMAIN entryCommitStats |->
+                   IF key \in keysToUpdate
+                   THEN [ entryCommitStats[key] EXCEPT !.committed = TRUE ] \* Update record
+                   ELSE entryCommitStats[key] ]                             \* Keep old record       
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, log, maxc, leaderCount, hovercraftVars>>
+
 \* Network state transitions
 
 \* The network duplicates a message

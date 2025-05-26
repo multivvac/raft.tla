@@ -58,7 +58,11 @@ HoverSpec == HoverInit /\ [][HoverNext]_varsH
 
 \* fake inv to obtain a trace
 LeaderCommitted ==
-    \E i \in Server : commitIndex[i] /= 1 \*
+    \E i \in (Server \ { switchIndex }) : commitIndex[i] /= 1 \*
+
+\* fake invariant to check the first two actions in MySwitchNext
+AllServersHaveOneUnorderedRequestInv ==
+    \E s \in Server :  Cardinality(unorderedRequests[s]) /= 2
 
 \*  Safety extension: Only commit with payload available everywhere counted.
 CommittedPayloadInv ==
@@ -111,7 +115,7 @@ THEOREM HoverSpec => ([]LogInv /\ []LeaderCompletenessInv /\ []LogMatchingInv /\
     mtype |-> AppendEntriesRequest,
     mterm |-> 2,
     mlog |-> <<[term |-> 2, value |-> "v1"], [term |-> 2, value |-> "v2"]>>,
-    mprevLogIndex |-> 0,
+    mprevLogIndex |-> 0,     /\ PrintT("MyInit: Servers=" \o ToString(ServerSet4))
     mprevLogTerm |-> 0,
     mentries |-> <<[term |-> 2, value |-> "v1"]>>,
     mcommitIndex |-> 0 ] :>

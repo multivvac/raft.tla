@@ -9,7 +9,7 @@ CONSTANTS Server
 CONSTANTS Value
 
 \* Server states.
-CONSTANTS Follower, Candidate, Leader
+CONSTANTS Follower, Candidate, Leader, Switch
 
 \* A reserved value.
 CONSTANTS Nil
@@ -27,12 +27,8 @@ CONSTANTS MaxBecomeLeader
 \* Maximum term number allowed in the model
 CONSTANTS MaxTerm
 
-\*---------------------------------------------------------------------------
-\*  New message kinds                                                         
-\*---------------------------------------------------------------------------
-CONSTANTS ClientPayload,     \* client -> server, carries large request value
-          RecoveryRequest,   \* follower -> any, ask for <<idx,term>> payload
-          RecoveryResponse   \* peer -> follower, ships missing payload
+\* \* Represent payload
+\* CONSTANTS Payload
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
